@@ -1,5 +1,7 @@
 #include <iostream>
+#include "FileManip.hpp"
 
 int main() {
-  return 0;
+    std::cout << "JJelloWorldadfa\n";
+    return 0;
 }

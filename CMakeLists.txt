@@ -15,8 +15,7 @@ set(PROJECT_DESCRIPTION "A Terminal Multitool")
 set(PROJECT_COPYRIGHT "Copyright (c) 2025 kotobazza")
 set(PROJECT_URL "https://github.com/kotobazza/temt")
 
-
-include(FetchContent)
+set(BUILD_TESTING OFF CACHE BOOL "Disable testing for libarchive")
 
 include(FetchContent)
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
@@ -77,6 +76,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 
+get_property(all_targets GLOBAL PROPERTY TARGETS)
+foreach(target ${all_targets})
+    if (target MATCHES "test_.*")  # Предполагаем, что тестовые цели начинаются с "test_"
+        set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    endif()
+endforeach()
+
 
 
 add_executable(main src/main.cpp)
@@ -96,20 +102,47 @@ target_include_directories(main PRIVATE ${cereal_SOURCE_DIR}/include)
 target_link_libraries(
     tests
     PRIVATE GTest::gtest_main
-    PRIVATE ftxui::screen
-    PRIVATE ftxui::dom
-    PRIVATE ftxui::component 
     PRIVATE archive
 )
 
 target_include_directories(tests PRIVATE ${cereal_SOURCE_DIR}/include)
 
 
-
-
 set_target_properties(main PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
+)
+
+
+file(GLOB headers "src/temt/*.hpp")
+foreach(file ${headers})
+  target_sources(main PUBLIC ${file})
+endforeach()
+
+file(GLOB sources "src/temt/*.cpp")
+foreach(file ${sources})
+  target_sources(main PRIVATE ${file})
+endforeach()
+
+target_include_directories(main
+PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/src/temt
+)
+
+
+file(GLOB headers "src/temt/*.hpp")
+foreach(file ${headers})
+  target_sources(tests PUBLIC ${file})
+endforeach()
+
+file(GLOB sources "src/temt/*.cpp")
+foreach(file ${sources})
+  target_sources(tests PRIVATE ${file})
+endforeach()
+
+target_include_directories(tests
+PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/src/temt
 )
 
 
@@ -137,5 +170,13 @@ include(CPack)
 enable_testing()
 add_test(tests tests)
 
+
 include(GoogleTest)
 gtest_discover_tests(tests)
+
+add_custom_target(run_tests
+  COMMAND ctest --test-dir ${CMAKE_BINARY_DIR} -R tests
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMENT "Running tests with ctest -R tests"
+)
+
