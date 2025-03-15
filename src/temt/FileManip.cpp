@@ -50,7 +50,7 @@ bool isDirectory(std::string_view path) {
     return std::filesystem::is_directory(clearNonRelativePath(path));
 }
 
-ActionState deletePath(std::string_view path) {}
+ActionState deletePath(std::string_view path) { return ActionState::Unavailable;}
 
 bool isEmpty(std::string_view path) {
     return std::filesystem::is_empty(clearNonRelativePath(path));

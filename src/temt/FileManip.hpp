@@ -43,7 +43,7 @@ ActionState createNewDirectory(std::string_view path);
 ActionState deletePath(std::string_view path);
 
 std::vector<FileInfo> getDirectoryFlatEntries(std::string_view path);
-std::string getParentPath(std::string path);
+std::string getParentPath(std::string_view path);
 
 bool isExistingPath(std::string_view path);
 bool isDirectory(std::string_view path);
