@@ -1,32 +1,15 @@
-#pragma once 
+#pragma once
+
 #include <string>
 #include <string_view>
 #include <vector>
 
+namespace temt {
+namespace FileManip {
 
+enum FileType { None, Block, Character, Directory, Socket, Pipe, Regular, Symlick, Other };
 
-
-namespace temt{
-
-enum FileType
-{
-    File,
-    Directory,
-    Socket,
-    Pipe,
-    Device
-};
-
-struct FileInfo
-{
-    std::string path;
-    std::string perms;
-    std::string owner;
-    std::string includingDirectory;
-    FileType type;
-};
-
-enum ActionState{
+enum ActionState {
     Done,
     IsDirectory,
     IsFile,
@@ -45,28 +28,30 @@ enum ActionState{
     StructFailed
 };
 
-
-class FileManipulation
-{
-public:
-    static std::string clearNonRelativePath(std::string_view path);
-    static bool createNewFile(std::string_view path);
-    static bool createNewDirectory(std::string_view path);
-
-    static bool deletePath(std::string_view path);
-
-    static std::vector<std::string> getDirectoryEntries(std::string_view path);
-    static std::string getParentPath(std::string path);
-
-    static bool isExistingPath(std::string_view path);
-    static bool isDirectory(std::string_view path);
-    static bool isFile(std::string_view path);
-    static bool isEmpty(std::string_view path);
-    static bool isArchive(std::string_view path);
-
-    static std::string transformPathFromArchiveToFolder(std::string_view path);
-    
+struct FileInfo {
+    std::string path;
+    std::string parentDirectory;
+    FileType type;
+    std::string perms;
+    std::string owner;
 };
 
+std::string clearNonRelativePath(std::string_view path);
+ActionState createNewFile(std::string_view path);
+ActionState createNewDirectory(std::string_view path);
 
-}
+ActionState deletePath(std::string_view path);
+
+std::vector<FileInfo> getDirectoryFlatEntries(std::string_view path);
+std::string getParentPath(std::string path);
+
+bool isExistingPath(std::string_view path);
+bool isDirectory(std::string_view path);
+bool isFile(std::string_view path);
+bool isEmpty(std::string_view path);
+
+FileType identifyFileType(std::string_view path);
+
+}  // namespace FileManip
+
+}  // namespace temt

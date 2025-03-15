@@ -2,116 +2,129 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <stack>
 #include <string>
 
+namespace temt {
 
-namespace temt{
+namespace FileManip {
 
-bool FileManipulation::createNewFile(std::string_view path)
-{
-    std::filesystem::path relativePath{FileManipulation::clearNonRelativePath(path)};
+ActionState createNewFile(std::string_view path) {
+    std::filesystem::path relativePath{clearNonRelativePath(path)};
 
-    //относительные пути?
-    if(isExistingPath(relativePath.string()))
-        return false;
-    std::filesystem::create_directories(std::filesystem::current_path() / relativePath.parent_path());  
-    std::ofstream fout {std::filesystem::current_path() / relativePath};
+    if (isExistingPath(relativePath.string()))
+        return ActionState::NotExists;
+    std::filesystem::create_directories(std::filesystem::current_path() / relativePath.parent_path());
+    std::ofstream fout{std::filesystem::current_path() / relativePath};
     fout.close();
 
-    return true;
-} 
-
-
-bool FileManipulation::createNewDirectory(std::string_view path)
-{
-    std::filesystem::path relativePath{FileManipulation::clearNonRelativePath(path)};
-    std::filesystem::create_directories(std::filesystem::current_path() / path);
-
-    return true;
+    return ActionState::Done;
 }
 
-std::string FileManipulation::clearNonRelativePath(std::string_view path)
-{
+ActionState createNewDirectory(std::string_view path) {
+    std::filesystem::path relativePath{clearNonRelativePath(path)};
+    std::filesystem::create_directories(std::filesystem::current_path() / path);
+
+    return ActionState::Done;
+}
+
+std::string clearNonRelativePath(std::string_view path) {
     std::string path_temp{path};
     size_t pos = 0;
-    while((pos = path_temp.find("../", pos)) != std::string::npos)
-    {
+    while ((pos = path_temp.find("../", pos)) != std::string::npos) {
         path_temp.erase(pos, 3);
     }
     return path_temp;
 }
 
-
-
-bool FileManipulation::isExistingPath(std::string_view path)
-{
+bool isExistingPath(std::string_view path) {
     return std::filesystem::exists(clearNonRelativePath(path));
 }
 
-
-bool FileManipulation::isFile(std::string_view path)
-{
+// TODO: regular_file
+bool isFile(std::string_view path) {
     return !std::filesystem::is_directory(clearNonRelativePath(path));
 }
 
-
-bool FileManipulation::isDirectory(std::string_view path)
-{
+bool isDirectory(std::string_view path) {
     return std::filesystem::is_directory(clearNonRelativePath(path));
 }
 
+ActionState deletePath(std::string_view path) {}
 
-bool FileManipulation::deletePath(std::string_view path)
-{
-    return std::filesystem::remove_all(clearNonRelativePath(path));
-}
-
-bool FileManipulation::isEmpty(std::string_view path)
-{
+bool isEmpty(std::string_view path) {
     return std::filesystem::is_empty(clearNonRelativePath(path));
 }
 
-std::vector<std::string> FileManipulation::getDirectoryEntries(std::string_view path)
-{
-    std::vector<std::string> contents;
+std::vector<FileInfo> getDirectoryFlatEntries(std::string_view path) {
+    std::vector<FileInfo> contents;
 
     for (const auto& entry : std::filesystem::directory_iterator(std::string(path))) {
-        contents.push_back(entry.path().filename().string());
+        contents.push_back({entry.path().filename().string(), getParentPath(entry.path().string()),
+                            identifyFileType(entry.path().string())});
     }
 
     return contents;
 }
 
-std::string FileManipulation::getParentPath(std::string path)
-{
+std::vector<FileInfo> getDirecotryRecursiveEntries(std::string_view path) {
+    std::vector<FileInfo> entries;
+    std::stack<std::filesystem::path> dirStack;
+    dirStack.push(path);
+
+    while (!dirStack.empty()) {
+        std::filesystem::path currentDir = dirStack.top();
+        dirStack.pop();
+
+        for (const auto& entry : std::filesystem::directory_iterator(currentDir)) {
+            if (std::filesystem::is_directory(entry)) {
+                dirStack.push(entry);
+            } else {
+                entries.push_back({entry.path().filename().string(), getParentPath(entry.path().string()),
+                                   identifyFileType(entry.path().string())});
+            }
+        }
+    }
+
+    return entries;
+}
+
+std::string getParentPath(std::string_view path) {
     return std::filesystem::path(path).parent_path().string();
 }
 
+FileType identifyFileType(std::string_view path) {
+    std::filesystem::directory_entry entry(path);
 
-bool FileManipulation::isArchive(std::string_view path)
-{
-    std::ifstream file(std::string(path), std::ios::binary);
-    if (!file.is_open()) {
-        return false;
+    // directory_entries can't be used in switches
+
+    FileType type;
+
+    if (entry.exists()) {
+        if (entry.is_regular_file()) {
+            type = FileType::Regular;
+        } else if (entry.is_directory()) {
+            type = FileType::Directory;
+        } else if (entry.is_symlink()) {
+            type = FileType::Symlick;
+        } else if (entry.is_block_file()) {
+            type = FileType::Block;
+        } else if (entry.is_character_file()) {
+            type = FileType::Character;
+        } else if (entry.is_fifo()) {
+            type = FileType::Pipe;
+        } else if (entry.is_socket()) {
+            type = FileType::Socket;
+        } else {
+            type = FileType::Other;
+        }
+    } else {
+        type = FileType::None;
     }
 
-    // Проверяем сигнатуру zip-архива
-    char header[4];
-    file.read(header, 4);
-    if (header[0] == 'P' && header[1] == 'K' && header[2] == '\x03' && header[3] == '\x04') {
-        return true;
-    }
-
-    return false;
+    return type;
 }
 
-std::string FileManipulation::transformPathFromArchiveToFolder(std::string_view path)
-{
-    std::filesystem::path zipPath{std::string(path)};
-    return zipPath.stem().string();
-}
+}  // namespace FileManip
 
-}
-
-
-
+}  // namespace temt
