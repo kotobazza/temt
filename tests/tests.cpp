@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "FileManip.hpp"
+#include "DiskInfo.hpp"
 
 TEST(FileManipulation, ClearNonRelativePathTest) {
     std::string path{"../../hello"};
