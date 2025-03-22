@@ -149,9 +149,11 @@ PRIVATE
 )
 
 if (MSVC)
-    target_compile_options(main PRIVATE /W4)
+    target_compile_options(main PRIVATE /O2 /W4)
+    target_compile_options(tests PRIVATE /O2 /W4)
 else ()
-    target_compile_options(main PRIVATE -Wall -Wextra -pedantic -Werror)
+    target_compile_options(main PRIVATE -O3 -Wall -Wextra -pedantic -Werror)
+    target_compile_options(tests PRIVATE -O3 -Wall -Wextra -pedantic -Werror)
 endif()
 
 
