@@ -111,12 +111,6 @@ target_link_libraries(
 
 target_include_directories(tests PRIVATE ${cereal_SOURCE_DIR}/include)
 
-
-
-
-
-
-
 set_target_properties(main PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
