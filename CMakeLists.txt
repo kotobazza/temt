@@ -34,3 +34,19 @@ if(NOT ftxui_POPULATED)
   FetchContent_Populate(ftxui)
   add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
+
+
+
+set(BUILD_TESTING OFF CACHE BOOL "Disable testing for libarchive")
+
+# --- libarchive
+
+FetchContent_Declare(
+    libarchive
+    GIT_REPOSITORY https://github.com/libarchive/libarchive.git
+    GIT_TAG master
+    GIT_SHALLOW
+    EXCLUDE_FROM_ALL
+)
+
+FetchContent_MakeAvailable(libarchive)
