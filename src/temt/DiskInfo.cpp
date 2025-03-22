@@ -11,6 +11,7 @@
 #endif
 
 #include "DiskInfo.hpp"
+#include "spdlog/spdlog.h"
 
 namespace temt {
 namespace DiskInfo {
@@ -39,14 +40,16 @@ std::vector<StoragePointInfo> getMountedPoints() {
                     records.push_back({fileSystemName, drivePath, fileSystemName, total, free});
                 }
             } else {
-                std::cerr << "Error getting disk space for " << drivePath << ": " << GetLastError() << std::endl;
+                auto logger = spdlog::get("file_logger");
+                logger->critical("DiskInfo(Windows): Error getting disk space for disk {}. Error: ", drivePath, GetLastError() );
             }
         }
     }
 #elif defined(PLATFORM_LINUX)
     FILE* mounts = setmntent("/proc/mounts", "r");
+    auto logger = spdlog::get("file_logger");
     if (mounts == nullptr) {
-        perror("setmntent");
+        logger->critical("DiskInfo(Linux): Error getting mount points");
         return {};
     }
 
@@ -59,7 +62,7 @@ std::vector<StoragePointInfo> getMountedPoints() {
 
             records.push_back({mnt->mnt_fsname, mnt->mnt_dir, mnt->mnt_type, total, free});
         } else {
-            perror("statvfs");
+            logger->critical("DiskInfo(Linux): Error getting mount point info (statvfs)");
         }
     }
 #endif
