@@ -50,7 +50,7 @@ bool isDirectory(std::string_view path) {
     return std::filesystem::is_directory(clearNonRelativePath(path));
 }
 
-ActionState deletePath(std::string_view path) { return ActionState::Unavailable;}
+//ActionState deletePath(std::string_view path) { return ActionState::Unavailable;}
 
 bool isEmpty(std::string_view path) {
     return std::filesystem::is_empty(clearNonRelativePath(path));
@@ -60,7 +60,7 @@ std::vector<FileInfo> readDirectoryFlatEntries(std::string_view path) {
     std::vector<FileInfo> contents;
 
     for (const auto& entry : std::filesystem::directory_iterator(std::string(path))) {
-        contents.push_back({entry.path().filename().string(), getParentPath(entry.path().string()),
+        contents.push_back(FileInfo{entry.path().filename().string(), getParentPath(entry.path().string()),
                             identifyFileType(entry.path().string())});
     }
 
@@ -80,7 +80,7 @@ std::vector<FileInfo> readDirectoryRecursiveEntries(std::string_view path) {
             if (std::filesystem::is_directory(entry)) {
                 dirStack.push(entry);
             } else {
-                entries.push_back({entry.path().filename().string(), getParentPath(entry.path().string()),
+                entries.push_back(FileInfo{entry.path().filename().string(), getParentPath(entry.path().string()),
                                    identifyFileType(entry.path().string())});
             }
         }
