@@ -117,6 +117,37 @@ set_target_properties(main PROPERTIES
     CMAKE_CXX_EXTENSIONS OFF
 )
 
+file(GLOB headers "src/temt/*.hpp")
+foreach(file ${headers})
+  target_sources(main PUBLIC ${file})
+endforeach()
+
+file(GLOB sources "src/temt/*.cpp")
+foreach(file ${sources})
+  target_sources(main PRIVATE ${file})
+endforeach()
+
+target_include_directories(main
+PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/src/temt
+)
+
+
+file(GLOB headers "src/temt/*.hpp")
+foreach(file ${headers})
+  target_sources(tests PUBLIC ${file})
+endforeach()
+
+file(GLOB sources "src/temt/*.cpp")
+foreach(file ${sources})
+  target_sources(tests PRIVATE ${file})
+endforeach()
+
+target_include_directories(tests
+PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/src/temt
+)
+
 if (MSVC)
     target_compile_options(main PRIVATE /W4)
 else ()
