@@ -1,0 +1,4 @@
+BasedOnStyle: Chromium
+Standard: Cpp11
+ColumnLimit: 120
+IndentWidth: 4
