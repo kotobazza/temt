@@ -3,7 +3,7 @@
 
 namespace temt {
 namespace Log {
-void createMainLogfile(std::string_view log_path) {
+void createFileLogger(std::string_view log_path) {
     try {
         auto logger = spdlog::get("file_logger");
         if (!logger) {
