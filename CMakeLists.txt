@@ -13,3 +13,24 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(PROJECT_DESCRIPTION "A Terminal Multitool")
 set(PROJECT_COPYRIGHT "Copyright (c) 2025 kotobazza")
 set(PROJECT_URL "https://github.com/kotobazza/temt")
+
+
+
+include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+set(FETCHCONTENT_QUIET FALSE)
+
+# --- FTXUI
+FetchContent_Declare(ftxui
+  GIT_REPOSITORY "https://github.com/ArthurSonzogni/ftxui"
+  GIT_TAG main
+  GIT_PROGRESS TRUE
+  GIT_SHALLOW
+)
+
+
+FetchContent_GetProperties(ftxui)
+if(NOT ftxui_POPULATED)
+  FetchContent_Populate(ftxui)
+  add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
