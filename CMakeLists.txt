@@ -117,6 +117,12 @@ set_target_properties(main PROPERTIES
     CMAKE_CXX_EXTENSIONS OFF
 )
 
+set_target_properties(tests PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED ON
+    CMAKE_CXX_EXTENSIONS OFF
+)
+
 file(GLOB headers "src/temt/*.hpp")
 foreach(file ${headers})
   target_sources(main PUBLIC ${file})
