@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.20)
+
+set(MINOR_VERSION "0" CACHE INTERNAL "Minor version")
+set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
+set(PROJECT_VERSION 0.${MINOR_VERSION}.${PATCH_VERSION})
+
+project(TeMT LANGUAGES C CXX VERSION ${PROJECT_VERSION})
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(PROJECT_DESCRIPTION "A Terminal Multitool")
+set(PROJECT_COPYRIGHT "Copyright (c) 2025 kotobazza")
+set(PROJECT_URL "https://github.com/kotobazza/temt")
