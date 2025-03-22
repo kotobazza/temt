@@ -7,13 +7,14 @@
         + Incude better versioning and better structure of commits
 
 + Tasks
-    + Initial Installation and Libs
-        + FTXUI
-        + libarchive
-        + cereal (?)
+    + ~~Initial Installation and Libs~~
+        + ~~README, TODO, CMakeLists.txt~~
+        + ~~FTXUI~~
+        + ~~libarchive~~
+        + ~~cereal (?)~~
             + Maybe rapidjson+rapidxml
-        + gtest
-        + logging feature?
+        + ~~gtest~~
+        + ~~logging feature?~~
     
     + Move old custom-viewer to TeMT
         + Redefine structure of namespaces and classes
