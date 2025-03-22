@@ -32,8 +32,8 @@ struct FileInfo {
     std::string path;
     std::string parentDirectory;
     FileType type;
-    std::string perms;
-    std::string owner;
+    std::string perms{""};
+    std::string owner{""};
 };
 
 std::string clearNonRelativePath(std::string_view path);
