@@ -11,7 +11,7 @@ set(PROJECT_DESCRIPTION "A Terminal Multitool")
 set(PROJECT_COPYRIGHT "Copyright (c) 2025 kotobazza")
 set(PROJECT_URL "https://github.com/kotobazza/temt")
 
-project(TeMT LANGUAGES C CXX VERSION ${PROJECT_VERSION})
+project(TeMT LANGUAGES CXX VERSION ${PROJECT_VERSION})
 
 
 
