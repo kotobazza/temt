@@ -21,9 +21,9 @@
             + Now i'll use namespace temt and subnamespaces for each feature of the TeMT
             + Static classes will be rebuilded into functions
         + Move old features to new namepsace structure
-            + FileManipulations
-            + ArchiveManipulations
-            + DiskInfo
+            + ~~FileManipulations~~
+            + ~~ArchiveManipulations~~
+            + ~~DiskInfo~~
             + Json/XML Serialization
                 + Rewrite Boost::PropertyTree to Cereal
             + Mine application class
