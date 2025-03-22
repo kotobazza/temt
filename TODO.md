@@ -18,10 +18,12 @@
     
     + Move old custom-viewer to TeMT
         + Redefine structure of namespaces and classes
-        + Move old features to new namepsace
-            + FileManipulations
-            + ArchiveManipulations
-            + DiskInfo
+            + Now i'll use namespace temt and subnamespaces for each feature of the TeMT
+            + Static classes will be rebuilded into functions
+        + Move old features to new namepsace structure
+            + ~~FileManipulations~~
+            + ~~ArchiveManipulations~~
+            + ~~DiskInfo~~
             + Json/XML Serialization
                 + Rewrite Boost::PropertyTree to Cereal
             + Mine application class
