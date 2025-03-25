@@ -105,6 +105,9 @@ target_include_directories(main PRIVATE ${cereal_SOURCE_DIR}/include)
 target_link_libraries(
     tests
     PRIVATE GTest::gtest_main
+    PRIVATE ftxui::screen
+    PRIVATE ftxui::dom
+    PRIVATE ftxui::component 
     PRIVATE archive
     PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>
 )
