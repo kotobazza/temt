@@ -5,19 +5,14 @@
 using namespace ftxui;
 
 Element DoubleClickMenu::OnRender() {
-    // Уменьшаем прогресс подсветки каждый кадр
-    if (highlight_progress_ > 0) {
-        highlight_progress_ -= 0.05f;
-        if (highlight_progress_ < 0)
-            highlight_progress_ = 0;
-    }
+    update_timerwait();
 
+    // 1. Собираем все элементы меню
     Elements elements;
     for (size_t i = 0; i < entries_.size(); ++i) {
         bool is_selected = (static_cast<int>(i) == selected_);
         bool is_highlighted = (static_cast<int>(i) == last_double_clicked_);
 
-        // Плавное изменение цвета подсветки
         auto bg_color = Color::RGB(100 + 155 * highlight_progress_, 100 + 155 * highlight_progress_, 255);
 
         auto style = (is_highlighted && highlight_progress_ > 0) ? bgcolor(bg_color) | bold
@@ -27,7 +22,14 @@ Element DoubleClickMenu::OnRender() {
         elements.push_back(hbox({text(is_selected ? "> " : "  "), text(entries_[i])}) | style);
     }
 
-    return vbox(elements) | border | vscroll_indicator;
+    // 2. Создаем скроллируемую область
+    auto content = vbox(elements);
+
+    // 3. Применяем необходимые модификаторы в правильном порядке
+    return vbox(
+               {// Фиксируем высоту и добавляем скролл
+                content | vscroll_indicator | frame | yflex, text("Total items: " + std::to_string(entries_.size()))}) |
+           border | yflex;
 }
 
 bool DoubleClickMenu::OnEvent(Event event) {
@@ -42,6 +44,7 @@ bool DoubleClickMenu::OnEvent(Event event) {
                 on_double_click_(selected_);
                 last_double_clicked_ = selected_;
                 highlight_progress_ = 1.0f;  // Запускаем подсветку
+                waiting_end_ = std::chrono::steady_clock::now();
                 return true;
             }
 
@@ -52,4 +55,18 @@ bool DoubleClickMenu::OnEvent(Event event) {
     }
 
     return ComponentBase::OnEvent(event);
+}
+
+void DoubleClickMenu::update_timerwait() {
+    // time здесь ничего не дает, все равно всё обновление происходит благодаря OnRender
+    auto time_since_last_timerwait =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - waiting_end_).count();
+    if (time_since_last_timerwait > 1) {
+        // Уменьшаем прогресс подсветки каждый кадр
+        if (highlight_progress_ > 0) {
+            highlight_progress_ -= 0.05f;
+            if (highlight_progress_ < 0)
+                highlight_progress_ = 0;
+        }
+    }
 }

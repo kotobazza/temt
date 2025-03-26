@@ -14,7 +14,7 @@ int main() {
     using namespace ftxui;
 
     auto screen = ScreenInteractive::Fullscreen();
-    std::vector<std::string> vals{"First", "Second", "Third", "Fourth"};
+    std::vector<std::string> vals{"First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Nineth", "Tenth"};
 
     auto menu = ftxui::Make<DoubleClickMenu>(vals, [](int index) {
         auto logger = spdlog::get("file_logger");
