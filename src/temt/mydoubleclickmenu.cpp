@@ -7,7 +7,6 @@ using namespace ftxui;
 Element DoubleClickMenu::OnRender() {
     update_timerwait();
 
-    // 1. Собираем все элементы меню
     Elements elements;
     for (size_t i = 0; i < entries_.size(); ++i) {
         bool is_selected = (static_cast<int>(i) == selected_);
@@ -22,13 +21,10 @@ Element DoubleClickMenu::OnRender() {
         elements.push_back(hbox({text(is_selected ? "> " : "  "), text(entries_[i])}) | style);
     }
 
-    // 2. Создаем скроллируемую область
     auto content = vbox(elements);
 
-    // 3. Применяем необходимые модификаторы в правильном порядке
     return vbox(
-               {// Фиксируем высоту и добавляем скролл
-                content | vscroll_indicator | frame | yflex, text("Total items: " + std::to_string(entries_.size()))}) |
+               {content | vscroll_indicator | frame | yflex, text("Total items: " + std::to_string(entries_.size()))}) |
            border | yflex;
 }
 
@@ -62,7 +58,6 @@ void DoubleClickMenu::update_timerwait() {
     auto time_since_last_timerwait =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - waiting_end_).count();
     if (time_since_last_timerwait > 1) {
-        // Уменьшаем прогресс подсветки каждый кадр
         if (highlight_progress_ > 0) {
             highlight_progress_ -= 0.05f;
             if (highlight_progress_ < 0)
