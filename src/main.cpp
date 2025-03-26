@@ -16,15 +16,19 @@ using namespace ftxui;
 int main() {
     temt::Log::createFileLogger("logs/logs.txt");
     auto screen = ScreenInteractive::Fullscreen();
+
+    int resizable_ = 30;
+    int memory_resizable=0;
     
     // Создаем наши компоненты
     auto upper_panel = std::make_shared<UpperPanel>();
-    auto left_panel = std::make_shared<LeftPanel>();
-    auto right_panel = std::make_shared<RightPanel>();
+    auto left_panel = std::make_shared<LeftPanel>(resizable_);
+    auto right_panel = std::make_shared<RightPanel>(left_panel->GetSizeRef());
     
     // Настраиваем обратный вызов для кнопки
     upper_panel->SetToggleCallback([&] {
         screen.PostEvent(Event::Custom); // Принудительно обновляем экран
+        std::swap(resizable_, memory_resizable);
     });
     
     // Создаем resizable split

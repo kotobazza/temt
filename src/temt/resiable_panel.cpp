@@ -1,9 +1,9 @@
 // resizable_panel.cpp
 #include "resizable_panel.hpp"
 
-ResizablePanel::ResizablePanel(const std::string& title) : title_(title) {}
+ResizablePanel::ResizablePanel(const std::string& title, int& size) : title_(title), size_(size) {}
 
-void ResizablePanel::SetSize(int size) {
+void ResizablePanel::SetSize(int& size) {
     size_ = size;
 }
 

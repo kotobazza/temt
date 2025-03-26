@@ -7,17 +7,17 @@
 
 class ResizablePanel {
 public:
-    ResizablePanel(const std::string& title);
+    ResizablePanel(const std::string& title, int& size);
     
     virtual ftxui::Component GetComponent() = 0;
     virtual ftxui::Element Render() = 0;
     
-    void SetSize(int size);
+    void SetSize(int& size);
     int GetSize() const;
     int& GetSizeRef();
     std::string GetTitle() const;
 
 protected:
     std::string title_;
-    int size_ = 50; // размер в процентах
+    int& size_; // размер в процентах
 };

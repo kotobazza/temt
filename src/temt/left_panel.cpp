@@ -4,16 +4,14 @@
 
 using namespace ftxui;
 
-LeftPanel::LeftPanel() : ResizablePanel("Left Panel") {}
+LeftPanel::LeftPanel(int& size) : ResizablePanel("Left Panel", size) {}
 
 Component LeftPanel::GetComponent() {
     return Renderer([this] { return Render(); });
 }
 
 Element LeftPanel::Render() {
-    return vbox({
-        text(title_),
-        paragraph("This is the resizable left panel."),
-        hbox({text("Size: "), text(std::to_string(size_) + "%")})
-    }) | border | flex;
+    return vbox({text(title_), paragraph("This is the resizable left panel."),
+                 hbox({text("Size: "), text(std::to_string(size_) + "%")})}) |
+           border | flex;
 }
