@@ -12,14 +12,16 @@ class DoubleClickMenu : public ftxui::ComponentBase {
         menu_ = ftxui::Menu(&entries_, &selected_);
         Add(menu_);
     };
-    Element OnRender() override;
-    bool OnEvent(Event event) override;
+    ftxui::Element OnRender() override;
+    bool OnEvent(ftxui::Event event) override;
 
     std::function<void(int)> on_double_click_ = [](int) {};
 
    private:
     std::vector<std::string> entries_;
     int selected_ = 0;
-    Component menu_;
+    ftxui::Component menu_;
     std::chrono::steady_clock::time_point last_click_time_;
+    int last_double_clicked_ = 0;
+    float highlight_progress_ = 0.0f;
 };
