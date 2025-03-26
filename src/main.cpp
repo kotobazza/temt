@@ -16,12 +16,10 @@ int main() {
     auto screen = ScreenInteractive::Fullscreen();
     std::vector<std::string> vals{"First", "Second", "Third", "Fourth"};
 
-    auto menu = ftxui::Make<DoubleClickMenu>(vals);
-
-    menu->on_double_click_ = [](int index) {
+    auto menu = ftxui::Make<DoubleClickMenu>(vals, [](int index) {
         auto logger = spdlog::get("file_logger");
         logger->info("double clicked menu: {}", index);
-    };
+    });
 
     screen.Loop(menu);
 

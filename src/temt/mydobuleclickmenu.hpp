@@ -7,7 +7,8 @@
 
 class DoubleClickMenu : public ftxui::ComponentBase {
    public:
-    DoubleClickMenu(std::vector<std::string>& vals) {
+    DoubleClickMenu(std::vector<std::string>& vals, std::function<void(int)>callback) {
+        on_double_click_ = callback;
         entries_ = vals;
         menu_ = ftxui::Menu(&entries_, &selected_);
         Add(menu_);
