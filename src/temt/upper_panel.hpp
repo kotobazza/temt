@@ -10,11 +10,16 @@ public:
     UpperPanel();
     
     ftxui::Component GetComponent();
-    void SetToggleCallback(std::function<void()> callback);
+    void SetLeftToggleCallback(std::function<void()> callback);
+    void SetRightToggleCallback(std::function<void()> callback);
     bool IsLeftPanelVisible() const;
+    bool IsRightPanelVisible() const;
 
 private:
     bool left_panel_visible_ = true;
-    ftxui::Component toggle_button_;
-    std::function<void()> toggle_callback_;
+    bool right_panel_visible_ = true;
+    ftxui::Component left_toggle_button_;
+    ftxui::Component right_toggle_button_;
+    std::function<void()> left_toggle_callback_;
+    std::function<void()> right_toggle_callback_;
 };
