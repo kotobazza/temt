@@ -1,23 +1,20 @@
 // resizable_panel.hpp
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
 #include "ftxui/component/component.hpp"
+#include "ftxui/component/component_base.hpp"
 
-class ResizablePanel {
-public:
+class ResizablePanel : public ftxui::ComponentBase {
+   public:
     ResizablePanel(const std::string& title, int& size);
-    
-    virtual ftxui::Component GetComponent() = 0;
-    virtual ftxui::Element Render() = 0;
-    
-    void SetSize(int& size);
-    int GetSize() const;
-    int& GetSizeRef();
-    std::string GetTitle() const;
 
-protected:
+    ftxui::Element OnRender() override = 0;
+
+    int& GetSizeRef();
+
+   protected:
     std::string title_;
-    int& size_; // размер в процентах
+    int& size_;  // размер в процентах
 };

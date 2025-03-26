@@ -6,11 +6,7 @@ using namespace ftxui;
 
 LeftPanel::LeftPanel(int& size) : ResizablePanel("Left Panel", size) {}
 
-Component LeftPanel::GetComponent() {
-    return Renderer([this] { return Render(); });
-}
-
-Element LeftPanel::Render() {
+Element LeftPanel::OnRender() {
     return vbox({text(title_), paragraph("This is the resizable left panel."),
                  hbox({text("Size: "), text(std::to_string(size_) + "%")})}) |
            border | flex;

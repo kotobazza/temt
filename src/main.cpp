@@ -21,6 +21,9 @@ int main() {
     int resizable2 = 30;
     int resizable3 = 40;
 
+    int memory_resize1 = 0;
+    int memory_resize3 = 0;
+
     // Создаем компоненты
     auto upper_panel = std::make_shared<UpperPanel>();
     auto left_panel = std::make_shared<LeftPanel>(resizable1);
@@ -28,36 +31,32 @@ int main() {
     auto right_panel = std::make_shared<RightPanel>(resizable3);
 
     // Настраиваем колбэки
-    upper_panel->SetLeftToggleCallback([&] { screen.PostEvent(Event::Custom); });
+    upper_panel->SetLeftToggleCallback([&] {
+        screen.PostEvent(Event::Custom);
+        std::swap(resizable1, memory_resize1);
+    });
 
-    upper_panel->SetRightToggleCallback([&] { screen.PostEvent(Event::Custom); });
+    upper_panel->SetRightToggleCallback([&] {
+        screen.PostEvent(Event::Custom);
+        std::swap(resizable3, memory_resize3);
+    });
 
     // Создаем resizable панели
-    auto left_and_center =
-        ResizableSplitLeft(left_panel->GetComponent(), center_panel->GetComponent(), &left_panel->GetSizeRef());
+    auto left_and_center = ResizableSplitLeft(left_panel, center_panel, &left_panel->GetSizeRef());
 
-    auto all_panels = ResizableSplitLeft(left_and_center, right_panel->GetComponent(), &center_panel->GetSizeRef());
+    auto all_panels = ResizableSplitRight(right_panel,left_and_center, &right_panel->GetSizeRef());
+
 
     // Главный компонент
-    auto main_component = Container::Vertical({upper_panel->GetComponent(), all_panels});
+    auto main_component = Container::Vertical({upper_panel, all_panels});
 
     // Рендерер
     auto renderer = Renderer(main_component, [&] {
-        auto upper = hbox({upper_panel->GetComponent()->Render() | center}) | border | flex;
+        auto upper = hbox({upper_panel->Render()|flex}) | border | flex;
 
         // Логика отображения панелей
         auto lower = [&] {
-            if (upper_panel->IsLeftPanelVisible() && upper_panel->IsRightPanelVisible()) {
-                return all_panels->Render();
-            } else if (upper_panel->IsLeftPanelVisible()) {
-                return left_and_center->Render();
-            } else if (upper_panel->IsRightPanelVisible()) {
-                auto center_and_right = ResizableSplitLeft(center_panel->GetComponent(), right_panel->GetComponent(),
-                                                           &center_panel->GetSizeRef());
-                return center_and_right->Render();
-            } else {
-                return center_panel->Render() | flex;
-            }
+            return all_panels->Render() | flex;
         }();
 
         return vbox({upper, lower | flex});

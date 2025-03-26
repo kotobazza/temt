@@ -6,6 +6,5 @@ class LeftPanel : public ResizablePanel {
 public:
     LeftPanel(int& size);
     
-    ftxui::Component GetComponent() override;
-    ftxui::Element Render() override;
+    ftxui::Element OnRender() override;
 };

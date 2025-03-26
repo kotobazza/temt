@@ -6,11 +6,7 @@ using namespace ftxui;
 
 CenterPanel::CenterPanel(int& size) : ResizablePanel("Center Panel", size) {}
 
-Component CenterPanel::GetComponent() {
-    return Renderer([this] { return Render(); });
-}
-
-Element CenterPanel::Render() {
+Element CenterPanel::OnRender() {
     return vbox({
         text(title_),
         paragraph("This is the central panel. It's always visible."),

@@ -3,9 +3,8 @@
 #include "resizable_panel.hpp"
 
 class CenterPanel : public ResizablePanel {
-public:
+   public:
     CenterPanel(int& size);
-    
-    ftxui::Component GetComponent() override;
-    ftxui::Element Render() override;
+
+    ftxui::Element OnRender() override;
 };
