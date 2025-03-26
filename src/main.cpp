@@ -52,14 +52,10 @@ int main() {
 
     // Рендерер
     auto renderer = Renderer(main_component, [&] {
-        auto upper = hbox({upper_panel->Render()|flex}) | border | flex;
+        auto upper = hbox({upper_panel->Render()|flex}) | border;
 
-        // Логика отображения панелей
-        auto lower = [&] {
-            return all_panels->Render() | flex;
-        }();
 
-        return vbox({upper, lower | flex});
+        return vbox({upper, all_panels->Render() | flex});
     });
 
     screen.Loop(renderer);
