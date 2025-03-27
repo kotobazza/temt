@@ -1,11 +1,17 @@
 // file_browser.cpp
 #include "file_browser.hpp"
 #include "ftxui/dom/elements.hpp"
+#include "ftxui/component/event.hpp"
 
 using namespace ftxui;
 
 FileBrowser::FileBrowser() {
+    menu_ = Menu(&file_names_, &selected_index_, MenuOption::Vertical());
     NavigateTo(std::filesystem::current_path());
+}
+
+ftxui::Element FileBrowser::OnRender(){
+    return menu_->Render();
 }
 
 void FileBrowser::NavigateTo(const std::filesystem::path& path) {
@@ -17,79 +23,57 @@ void FileBrowser::NavigateTo(const std::filesystem::path& path) {
 
 void FileBrowser::RefreshFiles() {
     files_.clear();
+    file_names_.clear();
     selected_index_ = 0;
     
+    // Добавляем переход в родительскую директорию
     if (current_path_.has_parent_path()) {
         files_.emplace_back(current_path_.parent_path());
+        file_names_.push_back(".. (parent directory)");
     }
     
+    // Собираем файлы и директории
     for (const auto& entry : std::filesystem::directory_iterator(
         current_path_, 
         std::filesystem::directory_options::skip_permission_denied)) {
+        
         files_.push_back(entry);
-    }
-}
-
-bool FileBrowser::OnEvent(Event event) {
-    if (!Focused()) return false;
-    
-    if (event == Event::ArrowUp || event == Event::Character('k')) {
-        MoveSelection(-1);
-        return true;
-    }
-    else if (event == Event::ArrowDown || event == Event::Character('j')) {
-        MoveSelection(1);
-        return true;
-    }
-    else if (event == Event::Return) {
-        if (!files_.empty()) {
-            const auto& entry = files_[selected_index_];
-            if (entry.is_directory()) {
-                NavigateTo(entry.path());
-            }
-            else if (on_file_select_) {
-                on_file_select_(entry.path());
-            }
-        }
-        return true;
+        std::string prefix = entry.is_directory() ? "📁 " : "📄 ";
+        file_names_.push_back(prefix + entry.path().filename().string());
     }
     
-    return CustomComponent::OnEvent(event);
-}
-
-void FileBrowser::MoveSelection(int offset) {
-    if (files_.empty()) return;
-    
-    selected_index_ += offset;
-    if (selected_index_ < 0) selected_index_ = 0;
-    if (selected_index_ >= static_cast<int>(files_.size())) 
-        selected_index_ = files_.size() - 1;
-    
-    if (on_file_select_ && !files_[selected_index_].is_directory()) {
+    // Если есть подписчик - уведомляем о новом выборе
+    if (!files_.empty() && on_file_select_) {
         on_file_select_(files_[selected_index_].path());
     }
 }
 
-Element FileBrowser::OnRender() {
-    Elements list;
-    
-    for (size_t i = 0; i < files_.size(); ++i) {
-        const auto& entry = files_[i];
-        auto style = (static_cast<int>(i) == selected_index_) 
-            ? (Focused() ? inverted : bold) 
-            : nothing;
-        
-        auto prefix = entry.is_directory() ? "📁 " : "📄 ";
-        list.push_back(text(prefix + entry.path().filename().string()) | style);
-    }
-    
-    return vbox({
-        text("Path: " + current_path_.string()) | bold,
-        separator(),
-        vbox(list) | frame | flex | border | focus
-    });
+std::filesystem::path FileBrowser::CurrentPath() const {
+    return current_path_;
+}
+
+std::filesystem::path FileBrowser::SelectedFile() const {
+    if (files_.empty()) return {};
+    return files_[selected_index_].path();
 }
 
 void FileBrowser::SetOnFileSelect(OnFileSelect callback) {
     on_file_select_ = callback;
+    
+    // Настраиваем обработчик выбора в меню
+    menu_ |= CatchEvent([this](Event event) {
+        if (event == Event::Return) {
+            if (!files_.empty()) {
+                const auto& entry = files_[selected_index_];
+                if (entry.is_directory()) {
+                    NavigateTo(entry.path());
+                }
+                else if (on_file_select_) {
+                    on_file_select_(entry.path());
+                }
+            }
+            return true;
+        }
+        return false;
+    });
 }
