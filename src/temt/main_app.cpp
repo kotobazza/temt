@@ -2,11 +2,13 @@
 #include "main_app.hpp"
 #include "ftxui/dom/elements.hpp"
 #include "LogInitializer.hpp"
+#include <iostream>
 
 using namespace ftxui;
 
 MainApp::MainApp() : screen_(ScreenInteractive::Fullscreen()) {
     auto log_file = spdlog::get("file_logger");
+    log_file->info("MainApp:Creating subcomponent instances");
     file_browser_ = std::make_shared<FileBrowser>();
     file_preview_ = std::make_shared<FilePreview>();
     command_palette_ = std::make_shared<CommandPalette>();
@@ -17,16 +19,18 @@ MainApp::MainApp() : screen_(ScreenInteractive::Fullscreen()) {
         file_preview_->SetFile(path);
     });
 
-    log_file->info("MainApp:Connected preview with browser");
+    log_file->info("MainApp: Connected preview with browser");
     
     SetupCommands();
-    SetupKeybindings();
+    
+
     
     // Основной layout
     auto main_container = Container::Horizontal({
         file_browser_,
         file_preview_
     });
+
     
     component_ = Renderer(main_container, [this] {
         return dbox({
@@ -46,6 +50,8 @@ MainApp::MainApp() : screen_(ScreenInteractive::Fullscreen()) {
             command_palette_->Render() | center
         });
     });
+
+    SetupKeybindings();
 
     log_file->info("MainApp:Created component");
 }
@@ -69,19 +75,43 @@ void MainApp::SetupCommands() {
 
 void MainApp::SetupKeybindings() {
     auto log_file = spdlog::get("file_logger");
-    component_ = CatchEvent(component_, [this](Event event) {
-        if (event == Event::F1) {
-            command_palette_->Toggle();
-            return true;
-        }
-        if (event == ftxui::Event::CtrlQ) {
-            screen_.Exit();
-            return true;
+    spdlog::error("starting_binding");
+
+    if (!command_palette_) {
+        spdlog::error("Command palette is not initialized!");
+        log_file->error("Command palette is not initialized!");
+        
+        return;
+    }
+
+    spdlog::error("Command palette is initialized!");
+
+    if(!component_){
+        spdlog::error("component_ is not initialized!");
+    }
+
+    component_ |= CatchEvent([this, log_file](const Event& event) {
+        try {
+            if (event == Event::F1) {
+                if (command_palette_) {
+                    command_palette_->Toggle();
+                    return true;
+                }
+                return false;
+            }
+            if (event == Event::CtrlQ) {
+                screen_.Exit();
+                return true;
+            }
+        } catch (const std::exception& e) {
+
         }
         return false;
     });
 
-    log_file->info("MainApp:Created subcomponent instances");
+    log_file->info("MainApp:Setup keybindings completed");
+    spdlog::error("MainApp:Setup keybindings completed");
+
 }
 
 Component MainApp::GetComponent() {
