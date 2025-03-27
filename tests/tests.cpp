@@ -1,5 +1,9 @@
 #include <gtest/gtest.h>
+#include "LogInitializer.hpp"
+#include "ArchiveManip.hpp"
 #include "FileManip.hpp"
+#include "CharProcessing.hpp"
+#include "DiskInfo.hpp"
 
 TEST(HelloWorld, GTestUsage) {
     int i = 0;
