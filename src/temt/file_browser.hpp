@@ -10,7 +10,7 @@ class FileBrowser : public ftxui::ComponentBase{
 public:
     FileBrowser();
     
-    ftxui::Element OnRender();
+    ftxui::Element OnRender() override;
     void NavigateTo(const std::filesystem::path& path);
     std::filesystem::path CurrentPath() const;
     std::filesystem::path SelectedFile() const;

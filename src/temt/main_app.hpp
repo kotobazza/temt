@@ -13,12 +13,11 @@ public:
 
 private:
     void SetupCommands();
-    void SetupKeybindings();
     
     std::shared_ptr<FileBrowser> file_browser_;
     std::shared_ptr<FilePreview> file_preview_;
     std::shared_ptr<CommandPalette> command_palette_;
     bool browser_focused = false;
-
+    
     void Log(const std::string& message);
 };
