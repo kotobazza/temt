@@ -91,6 +91,17 @@ FetchContent_MakeAvailable(spdlog)
 add_executable(main src/main.cpp)
 add_executable(tests tests/tests.cpp)
 
+target_compile_features(main PRIVATE cxx_std_20)
+set_target_properties(main PROPERTIES
+    CXX_EXTENSIONS OFF
+)
+
+target_compile_features(tests PRIVATE cxx_std_20)
+set_target_properties(tests PROPERTIES
+    CXX_EXTENSIONS OFF
+)
+
+
 target_link_libraries(
     main 
     PRIVATE ftxui::screen
@@ -113,18 +124,6 @@ target_link_libraries(
 )
 
 target_include_directories(tests PRIVATE ${cereal_SOURCE_DIR}/include)
-
-set_target_properties(main PROPERTIES
-    CXX_STANDARD 20
-    CXX_STANDARD_REQUIRED ON
-    CMAKE_CXX_EXTENSIONS OFF
-)
-
-set_target_properties(tests PROPERTIES
-    CXX_STANDARD 20
-    CXX_STANDARD_REQUIRED ON
-    CMAKE_CXX_EXTENSIONS OFF
-)
 
 file(GLOB headers "src/temt/*.hpp")
 foreach(file ${headers})
