@@ -18,13 +18,20 @@ class FileBrowserImpl : public ComponentBase {
         SetBrowserPosition(usingPath_);
 
         menu_ = Menu(&entriesNames_, &selected_);
-        Add(menu_);
+
+        returnBtn_ = Button("◀ ", [this]() { openParentDirectory(); })|bold;
+
+        Add(Container::Vertical({returnBtn_, menu_}));
     }
 
     Element OnRender() override final {
-        return vbox({text(usingPath_) | border, menu_->Render() | vscroll_indicator | yframe | flex |
-                                                    reflect(menuBox_) | focusPosition(0, selected_)}) |
-               border;
+        return vbox({
+            hbox({
+                returnBtn_->Render(), 
+                text(usingPath_) | border
+            }), 
+            menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_) |focusPosition(0, selected_)}
+        ) | border;
     }
 
     bool OnEvent(Event event) override final {
@@ -64,6 +71,7 @@ class FileBrowserImpl : public ComponentBase {
     int lastDoubleClicked_ = 0;
     std::chrono::steady_clock::time_point lastClickTime_;
     std::shared_ptr<spdlog::logger> file_logger_ = spdlog::get("file_logger");
+    ftxui::Component returnBtn_;
 
     void SetBrowserPosition(const std::string_view path) {
         usingPath_ = path.data();
@@ -97,6 +105,12 @@ class FileBrowserImpl : public ComponentBase {
         if (temt::FileManip::isExistingPath(newPath) && temt::FileManip::isDirectory(newPath)) {
             OpenDirectory(newPath);
         }
+    }
+
+    void openParentDirectory() {
+        SetBrowserPosition(temt::FileManip::getParentPath(usingPath_));
+        ScreenInteractive::Active()->PostEvent(Event::Custom);
+
     }
 
     void OpenDirectory(const std::string_view path) {
