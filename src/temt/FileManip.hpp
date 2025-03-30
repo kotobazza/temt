@@ -52,6 +52,8 @@ bool isDirectory(std::string_view path);
 bool isFile(std::string_view path);
 bool isEmpty(std::string_view path);
 
+std::string assemblePath(std::string_view parent, std::string_view child);
+
 FileType identifyFileType(std::string_view path);
 
 }  // namespace FileManip
