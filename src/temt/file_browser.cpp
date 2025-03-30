@@ -19,19 +19,16 @@ class FileBrowserImpl : public ComponentBase {
 
         menu_ = Menu(&entriesNames_, &selected_);
 
-        returnBtn_ = Button("◀ ", [this]() { openParentDirectory(); })|bold;
+        returnBtn_ = Button("◀ ", [this]() { openParentDirectory(); }) | bold;
 
         Add(Container::Vertical({returnBtn_, menu_}));
     }
 
     Element OnRender() override final {
-        return vbox({
-            hbox({
-                returnBtn_->Render(), 
-                text(usingPath_) | border
-            }), 
-            menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_) |focusPosition(0, selected_)}
-        ) | border;
+        return vbox({hbox({returnBtn_->Render(), text(usingPath_) | border}), menu_->Render() | vscroll_indicator |
+                                                                                  yframe | flex | reflect(menuBox_) |
+                                                                                  focusPosition(0, selected_)}) |
+               border;
     }
 
     bool OnEvent(Event event) override final {
@@ -44,7 +41,7 @@ class FileBrowserImpl : public ComponentBase {
                 auto time_since_last_click =
                     std::chrono::duration_cast<std::chrono::milliseconds>(now - lastClickTime_).count();
 
-                if (time_since_last_click < 500 && last_selected_ == selected_) {
+                if (time_since_last_click < 500 && last_selected_ == selected_) {    //TODO: remove 500 and set it as parameter
                     OnDoubleClickEvent(selected_);
                     lastDoubleClicked_ = selected_;
 
@@ -55,16 +52,14 @@ class FileBrowserImpl : public ComponentBase {
                 return false;
             }
         }
-        if(event == Event::Return){
-            if(returnBtn_->Active()){
+        if (event == Event::Return) {
+            if (returnBtn_->Active()) {
                 return ComponentBase::OnEvent(event);
             }
             OpenPath(selected_);
             file_logger_->info("Clicked on Enter");
             return true;
-            
         }
-
 
         return ComponentBase::OnEvent(event);
     }
@@ -110,10 +105,9 @@ class FileBrowserImpl : public ComponentBase {
         }
 
         OpenPath(selected);
-        
     }
 
-    void OpenPath(const int selected){
+    void OpenPath(const int selected) {
         auto entry = entries_[selected];
 
         std::string newPath = temt::FileManip::assemblePath(entry.parentDirectory, entry.path);
@@ -126,7 +120,6 @@ class FileBrowserImpl : public ComponentBase {
     void openParentDirectory() {
         SetBrowserPosition(temt::FileManip::getParentPath(usingPath_));
         ScreenInteractive::Active()->PostEvent(Event::Custom);
-
     }
 
     void OpenDirectory(const std::string_view path) {
