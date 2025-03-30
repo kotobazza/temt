@@ -14,7 +14,7 @@ using namespace ftxui;
 
 class FileBrowserImpl : public ComponentBase {
    public:
-    FileBrowserImpl(const std::string_view path) : usingPath_(path.data()) {
+    FileBrowserImpl(const std::string_view path, int& data) : usingPath_(path.data()), selected_(data) {
         SetBrowserPosition(usingPath_);
 
         menu_ = Menu(&entriesNames_, &selected_);
@@ -58,7 +58,7 @@ class FileBrowserImpl : public ComponentBase {
     std::string usingPath_;
     std::vector<std::string> entriesNames_;
     std::vector<temt::FileManip::FileInfo> entries_;
-    int selected_ = 0;
+    int& selected_;
     ftxui::Component menu_;
     ftxui::Box menuBox_;
     int lastDoubleClicked_ = 0;
@@ -110,6 +110,6 @@ class FileBrowserImpl : public ComponentBase {
     }
 };
 
-ftxui::Component FileBrowser(std::string_view path) {
-    return ftxui::Make<FileBrowserImpl>(path);
+ftxui::Component FileBrowser(std::string_view path, int& a) {
+    return ftxui::Make<FileBrowserImpl>(path, a);
 }
