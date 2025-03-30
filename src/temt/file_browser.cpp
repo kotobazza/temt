@@ -23,30 +23,29 @@ class FileBrowserImpl : public ComponentBase {
 
     Element OnRender() override final {
         return vbox({text(usingPath_) | border, menu_->Render() | vscroll_indicator | yframe | flex |
-                                                    reflect(menuBox_) | focusPosition(0, selected_ + menuBox_.y_min)}) |
+                                                    reflect(menuBox_) | focusPosition(0, selected_)}) |
                border;
     }
 
     bool OnEvent(Event event) override final {
         if (event.is_mouse() && event.mouse().button == Mouse::Left) {
             if (event.mouse().motion == Mouse::Pressed && menuBox_.Contain(event.mouse().x, event.mouse().y)) {
-                int local_y = event.mouse().y - menuBox_.y_min;
-
-                if (local_y >= 0 && local_y < static_cast<int>(entriesNames_.size())) {
-                    auto now = std::chrono::steady_clock::now();
-                    auto time_since_last_click =
-                        std::chrono::duration_cast<std::chrono::milliseconds>(now - lastClickTime_).count();
-
-                    if (time_since_last_click < 500 && local_y == selected_) {
-                        OnDoubleClickEvent(selected_);
-                        lastDoubleClicked_ = selected_;
-
-                        return ComponentBase::OnEvent(event);
-                    }
-
-                    selected_ = local_y;
-                    lastClickTime_ = now;
+                if (!ComponentBase::OnEvent(event)) {
+                    return false;
                 }
+                auto now = std::chrono::steady_clock::now();
+                auto time_since_last_click =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(now - lastClickTime_).count();
+
+                if (time_since_last_click < 500 && last_selected_ == selected_) {
+                    OnDoubleClickEvent(selected_);
+                    lastDoubleClicked_ = selected_;
+
+                    return true;
+                }
+                lastClickTime_ = now;
+                last_selected_ = selected_;
+                return false;
             }
         }
         return ComponentBase::OnEvent(event);
@@ -59,6 +58,7 @@ class FileBrowserImpl : public ComponentBase {
     std::vector<std::string> entriesNames_;
     std::vector<temt::FileManip::FileInfo> entries_;
     int& selected_;
+    int last_selected_ = 0;
     ftxui::Component menu_;
     ftxui::Box menuBox_;
     int lastDoubleClicked_ = 0;
