@@ -25,9 +25,9 @@ class FileBrowserImpl : public ComponentBase {
     }
 
     Element OnRender() override final {
-        return vbox({hbox({returnBtn_->Render(), text(usingPath_) | border}), menu_->Render() | vscroll_indicator |
-                                                                                  yframe | flex | reflect(menuBox_) |
-                                                                                  focusPosition(0, selected_)}) |
+        return vbox({hbox({returnBtn_->Render(), hbox({text("/> ")|color(ftxui::Color::Cyan), text(usingPath_) })| border | bold }),
+                     menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_) |
+                         focusPosition(0, selected_)}) |
                border;
     }
 
@@ -41,7 +41,8 @@ class FileBrowserImpl : public ComponentBase {
                 auto time_since_last_click =
                     std::chrono::duration_cast<std::chrono::milliseconds>(now - lastClickTime_).count();
 
-                if (time_since_last_click < 500 && last_selected_ == selected_) {    //TODO: remove 500 and set it as parameter
+                if (time_since_last_click < 500 &&
+                    last_selected_ == selected_) {  // TODO: remove 500 and set it as parameter
                     OnDoubleClickEvent(selected_);
                     lastDoubleClicked_ = selected_;
 
