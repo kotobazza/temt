@@ -87,13 +87,8 @@ class FileBrowserImpl : public ComponentBase {
         }
 
         if (!(selected >= 0 && selected < static_cast<int>(entries_.size()))) {
-            file_logger_->critical("Error in selected, {}, {}", selected, static_cast<int>(entries_.size()));
-            file_logger_->flush();
             return;
         }
-
-        file_logger_->info("Double clicked value: {}", entries_[selected].path);
-        file_logger_->flush();
 
         auto entry = entries_[selected];
 
