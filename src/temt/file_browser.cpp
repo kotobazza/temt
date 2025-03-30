@@ -63,7 +63,7 @@ class FileBrowserImpl : public ComponentBase {
     ftxui::Box menuBox_;
     int lastDoubleClicked_ = 0;
     std::chrono::steady_clock::time_point lastClickTime_;
-    std::shared_ptr<spdlog::logger> file_logger = spdlog::get("file_logger");
+    std::shared_ptr<spdlog::logger> file_logger_ = spdlog::get("file_logger");
 
     void SetBrowserPosition(const std::string_view path) {
         usingPath_ = path.data();
@@ -75,22 +75,25 @@ class FileBrowserImpl : public ComponentBase {
         for (auto ent : entries_) {
             entriesNames_.push_back(temt::emoji::emojiedFileName(ent));
         }
+
+        file_logger_->info("FileBrowser: opened browser on new path: ", path);
+        file_logger_->flush();
     }
 
     void OnDoubleClickEvent(const int selected) {
-        if (!file_logger) {
+        if (!file_logger_) {
             spdlog::critical("no filelogger");
             return;
         }
 
         if (!(selected >= 0 && selected < static_cast<int>(entries_.size()))) {
-            file_logger->critical("Error in selected, {}, {}", selected, static_cast<int>(entries_.size()));
-            file_logger->flush();
+            file_logger_->critical("Error in selected, {}, {}", selected, static_cast<int>(entries_.size()));
+            file_logger_->flush();
             return;
         }
 
-        file_logger->info("Double clicked value: {}", entries_[selected].path);
-        file_logger->flush();
+        file_logger_->info("Double clicked value: {}", entries_[selected].path);
+        file_logger_->flush();
 
         auto entry = entries_[selected];
 
