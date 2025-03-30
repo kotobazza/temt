@@ -23,7 +23,7 @@ class FileBrowserImpl : public ComponentBase {
 
     Element OnRender() override final {
         return vbox({text(usingPath_) | border,
-                     menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_)}) |
+                     menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_) | focusPosition(0, selected_+menuBox_.y_min)}) |
                border;
     }
 
@@ -40,11 +40,13 @@ class FileBrowserImpl : public ComponentBase {
                     if (time_since_last_click < 500 && local_y == selected_) {
                         OnDoubleClickEvent(selected_);
                         lastDoubleClicked_ = selected_;
+                        
+                        return ComponentBase::OnEvent(event);
                     }
 
                     selected_ = local_y;
                     lastClickTime_ = now;
-                    return true;
+                    
                 }
             }
         }
@@ -93,7 +95,7 @@ class FileBrowserImpl : public ComponentBase {
 
         auto entry = entries_[selected];
 
-        std::string newPath = entry.parentDirectory + "/" + entry.path;  // TODO: true path assembling
+        std::string newPath = temt::FileManip::assemblePath(entry.parentDirectory, entry.path);  // TODO: true path assembling
 
         if (temt::FileManip::isExistingPath(newPath) && temt::FileManip::isDirectory(newPath)) {
             OpenDirectory(newPath);
