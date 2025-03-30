@@ -7,11 +7,11 @@ namespace emoji {
 std::string emojiedFileName(FileManip::FileInfo file) {
     switch (file.type) {
         case FileManip::FileType::Directory:
-            return "📁" + file.path;
+            return "📁 " + file.path;
         case FileManip::FileType::Character:
-            return "📝" + file.path;
+            return "📝 " + file.path;
         default:
-            return "❓" + file.path;
+            return "❓ " + file.path;
     }
 }
 }  // namespace emoji
