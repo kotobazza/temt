@@ -125,6 +125,10 @@ FileType identifyFileType(std::string_view path) {
     return type;
 }
 
+std::string assemblePath(std::string_view parent, std::string_view child){
+    return (std::filesystem::path(parent.data()) / child.data()).c_str();
+}
+
 }  // namespace FileManip
 
 }  // namespace temt
