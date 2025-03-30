@@ -1,11 +1,14 @@
-#include "file_browser.hpp"
+#include <chrono>
 #include <vector>
-#include "FileManip.hpp"
-#include "emoji_util.hpp"
+
 #include "ftxui/component/event.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/dom/elements.hpp"
 #include "spdlog/spdlog.h"
+
+#include "FileManip.hpp"
+#include "emoji_util.hpp"
+#include "file_browser.hpp"
 
 using namespace ftxui;
 
@@ -19,35 +22,29 @@ class FileBrowserImpl : public ComponentBase {
     }
 
     Element OnRender() override final {
-        return vbox({text(usingPath_) | border, menu_->Render() | vscroll_indicator | yframe | flex | reflect(box_)}) |
+        return vbox({text(usingPath_) | border,
+                     menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_)}) |
                border;
     }
 
     bool OnEvent(Event event) override final {
         if (event.is_mouse() && event.mouse().button == Mouse::Left) {
-            if (event.mouse().motion == Mouse::Pressed && box_.Contain(event.mouse().x, event.mouse().y)) {
-                Box menu_box = box_;
-                // menu_box.y_min += 1;  // Учитываем заголовок
+            if (event.mouse().motion == Mouse::Pressed && menuBox_.Contain(event.mouse().x, event.mouse().y)) {
+                int local_y = event.mouse().y - menuBox_.y_min;
 
-                if (menu_box.Contain(event.mouse().x, event.mouse().y)) {
-                    int local_y = event.mouse().y - menu_box.y_min;
+                if (local_y >= 0 && local_y < static_cast<int>(entriesNames_.size())) {
+                    auto now = std::chrono::steady_clock::now();
+                    auto time_since_last_click =
+                        std::chrono::duration_cast<std::chrono::milliseconds>(now - lastClickTime_).count();
 
-                    if (local_y >= 0 && local_y < static_cast<int>(entriesNames_.size())) {
-                        auto now = std::chrono::steady_clock::now();
-                        auto time_since_last_click =
-                            std::chrono::duration_cast<std::chrono::milliseconds>(now - lastClickTime_).count();
-
-                        if (time_since_last_click < 500 && local_y == selected_) {
-                            OnDoubleClickEvent(selected_);
-                            lastDoubleClicked_ = selected_;
-                            lastClickTime_ = now;
-                            return true;
-                        }
-
-                        selected_ = local_y;
-                        lastClickTime_ = now;
-                        return true;
+                    if (time_since_last_click < 500 && local_y == selected_) {
+                        OnDoubleClickEvent(selected_);
+                        lastDoubleClicked_ = selected_;
                     }
+
+                    selected_ = local_y;
+                    lastClickTime_ = now;
+                    return true;
                 }
             }
         }
@@ -57,18 +54,16 @@ class FileBrowserImpl : public ComponentBase {
     bool Focusable() const final { return true; }
 
    private:
+    std::string usingPath_;
     std::vector<std::string> entriesNames_;
     std::vector<temt::FileManip::FileInfo> entries_;
-    std::string usingPath_;
-    ftxui::Component menu_;
     int selected_ = 0;
+    ftxui::Component menu_;
+    ftxui::Box menuBox_;
     int lastDoubleClicked_ = 0;
     std::chrono::steady_clock::time_point lastClickTime_;
-    ftxui::Box box_;
 
-    bool SetBrowserPosition(const std::string_view path) {
-        
-
+    void SetBrowserPosition(const std::string_view path) {
         usingPath_ = path.data();
 
         entries_.clear();
@@ -78,8 +73,6 @@ class FileBrowserImpl : public ComponentBase {
         for (auto ent : entries_) {
             entriesNames_.push_back(temt::emoji::emojiedFileName(ent));
         }
-
-        return true;
     }
 
     void OnDoubleClickEvent(const int selected) {
@@ -89,7 +82,7 @@ class FileBrowserImpl : public ComponentBase {
             return;
         }
 
-        if(!(selected >= 0 && selected < static_cast<int>(entries_.size()))){
+        if (!(selected >= 0 && selected < static_cast<int>(entries_.size()))) {
             file_logger->critical("Error in selected, {}, {}", selected, static_cast<int>(entries_.size()));
             file_logger->flush();
             return;
@@ -100,8 +93,7 @@ class FileBrowserImpl : public ComponentBase {
 
         auto entry = entries_[selected];
 
-        std::string newPath = entry.parentDirectory + "/" + entry.path; //TODO: true path assembling
-
+        std::string newPath = entry.parentDirectory + "/" + entry.path;  // TODO: true path assembling
 
         if (temt::FileManip::isExistingPath(newPath) && temt::FileManip::isDirectory(newPath)) {
             OpenDirectory(newPath);
@@ -109,7 +101,7 @@ class FileBrowserImpl : public ComponentBase {
     }
 
     void OpenDirectory(const std::string_view path) {
-        SetBrowserPosition(path);  // TODO: true path assembling
+        SetBrowserPosition(path);
         ScreenInteractive::Active()->PostEvent(Event::Custom);
     }
 };
