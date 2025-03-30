@@ -3,6 +3,7 @@
 #include "FileManip.hpp"
 #include "emoji_util.hpp"
 #include "ftxui/component/event.hpp"
+#include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/dom/elements.hpp"
 #include "spdlog/spdlog.h"
 
@@ -11,18 +12,10 @@ using namespace ftxui;
 class FileBrowserImpl : public ComponentBase {
    public:
     FileBrowserImpl(const std::string_view path) : usingPath_(path.data()) {
-        
-        if (temt::FileManip::isExistingPath(usingPath_) && temt::FileManip::isDirectory(usingPath_)) {
-            entries_ = temt::FileManip::readDirectoryFlatEntries(usingPath_);
-            
-            for (auto ent : entries_) {
-                entriesNames_.push_back(temt::emoji::emojiedFileName(ent));
-            }
+        SetBrowserPosition(usingPath_);
 
-            menu_ = Menu(&entriesNames_, &selected_);
-
-            Add(menu_);
-        }
+        menu_ = Menu(&entriesNames_, &selected_);
+        Add(menu_);
     }
 
     Element OnRender() override final {
@@ -73,6 +66,22 @@ class FileBrowserImpl : public ComponentBase {
     std::chrono::steady_clock::time_point lastClickTime_;
     ftxui::Box box_;
 
+    bool SetBrowserPosition(const std::string_view path) {
+        
+
+        usingPath_ = path.data();
+
+        entries_.clear();
+        entriesNames_.clear();
+        entries_ = temt::FileManip::readDirectoryFlatEntries(path);
+
+        for (auto ent : entries_) {
+            entriesNames_.push_back(temt::emoji::emojiedFileName(ent));
+        }
+
+        return true;
+    }
+
     void OnDoubleClickEvent(const int selected) {
         auto file_logger = spdlog::get("file_logger");
         if (!file_logger) {
@@ -80,16 +89,28 @@ class FileBrowserImpl : public ComponentBase {
             return;
         }
 
-        if (selected >= 0 && selected < static_cast<int>(entries_.size())) {
-            file_logger->info("Double clicked value: {}", entries_[selected].path);
-            file_logger->flush();
-
-            // Здесь можно добавить логику обработки двойного клика
-            // Например, открытие файла/папки
-        } else {
+        if(!(selected >= 0 && selected < static_cast<int>(entries_.size()))){
             file_logger->critical("Error in selected, {}, {}", selected, static_cast<int>(entries_.size()));
             file_logger->flush();
+            return;
         }
+
+        file_logger->info("Double clicked value: {}", entries_[selected].path);
+        file_logger->flush();
+
+        auto entry = entries_[selected];
+
+        std::string newPath = entry.parentDirectory + "/" + entry.path; //TODO: true path assembling
+
+
+        if (temt::FileManip::isExistingPath(newPath) && temt::FileManip::isDirectory(newPath)) {
+            OpenDirectory(newPath);
+        }
+    }
+
+    void OpenDirectory(const std::string_view path) {
+        SetBrowserPosition(path);  // TODO: true path assembling
+        ScreenInteractive::Active()->PostEvent(Event::Custom);
     }
 };
 
