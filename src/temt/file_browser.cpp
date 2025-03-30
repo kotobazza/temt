@@ -55,6 +55,17 @@ class FileBrowserImpl : public ComponentBase {
                 return false;
             }
         }
+        if(event == Event::Return){
+            if(returnBtn_->Active()){
+                return ComponentBase::OnEvent(event);
+            }
+            OpenPath(selected_);
+            file_logger_->info("Clicked on Enter");
+            return true;
+            
+        }
+
+
         return ComponentBase::OnEvent(event);
     }
 
@@ -98,6 +109,11 @@ class FileBrowserImpl : public ComponentBase {
             return;
         }
 
+        OpenPath(selected);
+        
+    }
+
+    void OpenPath(const int selected){
         auto entry = entries_[selected];
 
         std::string newPath = temt::FileManip::assemblePath(entry.parentDirectory, entry.path);
