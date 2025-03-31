@@ -30,7 +30,7 @@ class FileBrowserImpl : public ComponentBase {
                            hbox({text("/> ") | color(ftxui::Color::Cyan), text(usingPath_)}) | border | bold}),
                      menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_) |
                          focusPosition(0, selected_)}) |
-               border;
+               border|yflex;
     }
 
     bool OnEvent(Event event) override final {
