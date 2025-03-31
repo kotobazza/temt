@@ -2,6 +2,7 @@
 #include "FileManip.hpp"
 #include "file_browser.hpp"
 #include "hideable.hpp"
+#include "spdlog/spdlog.h"
 
 #include <filesystem>
 
@@ -12,11 +13,11 @@ class Impl : public ComponentBase {
     Impl() {
         exec_path = std::filesystem::current_path().c_str();
         fileBrowser_ =
-            Hideable({FileBrowser(exec_path, fileBrowserEntries_, selectedFileBrowser_)}, hiddenFileBrowserPanel_);
+            Hideable({FileBrowser(exec_path, fileBrowserEntries_, selectedFileBrowser_, [this](){return OpenSelectedFile();})}, hiddenFileBrowserPanel_);
         upperPanel_ = Container::Horizontal(
             {Button(" < ", [&]() { hiddenFileBrowserPanel_ = !hiddenFileBrowserPanel_; }), Button("Menu", []() {}),
              Button("Help", []() {}),
-             Renderer([&]() { return hbox({text("#>") | color(ftxui::Color::Yellow1), text(exec_path)}); }) | vcenter |
+             Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(exec_path)}); }) | vcenter |
                  bold,
              Renderer([]() { return filler(); }), Button(" ✖ ", []() {})});
 
@@ -42,6 +43,10 @@ class Impl : public ComponentBase {
             flex);
     }
 
+    void OpenSelectedFile(){
+        file_logger_->info("Selected file: {}", fileBrowserEntries_[selectedFileBrowser_].parentDirectory);
+    }
+
    private:
     ftxui::Component fileBrowser_;
     ftxui::Component upperPanel_;
@@ -50,9 +55,11 @@ class Impl : public ComponentBase {
 
     std::string exec_path;
 
+    std::shared_ptr<spdlog::logger> file_logger_ = spdlog::get("file_logger");
+
     std::vector<temt::FileManip::FileInfo> fileBrowserEntries_;
-    int selectedFileBrowser_;
-    bool hiddenFileBrowserPanel_ = false;
+    int selectedFileBrowser_=0;
+    bool hiddenFileBrowserPanel_ = true;
 };
 
 Component MainApp() {
