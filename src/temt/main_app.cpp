@@ -19,7 +19,7 @@ class Impl : public ComponentBase {
              Button("Help", []() {}),
              Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(exec_path)}); }) | vcenter |
                  bold,
-             Renderer([]() { return filler(); }), Button(" ✖ ", []() {})});
+             Renderer([]() { return filler(); }), Button(" ✖ ", [this]() {exitClosure_();})});
 
         logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
 
