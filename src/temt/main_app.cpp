@@ -10,7 +10,7 @@ using namespace ftxui;
 
 class Impl : public ComponentBase {
    public:
-    Impl() {
+    Impl(std::function<void()> exitClosure) : exitClosure_(exitClosure){
         exec_path = std::filesystem::current_path().c_str();
         fileBrowser_ =
             Hideable({FileBrowser(exec_path, fileBrowserEntries_, selectedFileBrowser_, [this](){return OpenSelectedFile();})}, hiddenFileBrowserPanel_);
@@ -53,15 +53,16 @@ class Impl : public ComponentBase {
     ftxui::Component mainPanel_;
     ftxui::Component logPanel_;
 
-    std::string exec_path;
+    std::function<void()> exitClosure_;
 
     std::shared_ptr<spdlog::logger> file_logger_ = spdlog::get("file_logger");
 
+    std::string exec_path;
     std::vector<temt::FileManip::FileInfo> fileBrowserEntries_;
     int selectedFileBrowser_=0;
     bool hiddenFileBrowserPanel_ = true;
 };
 
-Component MainApp() {
-    return Make<Impl>();
+Component MainApp(std::function<void()> exitClosure) {
+    return Make<Impl>(exitClosure);
 }

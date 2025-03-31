@@ -3,4 +3,4 @@
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/component_base.hpp"
 
-ftxui::Component MainApp();
+ftxui::Component MainApp(std::function<void()> exitClosure);
