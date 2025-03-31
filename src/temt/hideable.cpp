@@ -15,7 +15,8 @@ class Impl : public ComponentBase {
     }
 
     Element OnRender() override final {
-        if(!toggled) return emptyElement();
+        if (!toggled)
+            return emptyElement();
 
         Elements elements;
         for (auto& child : children_) {
@@ -26,7 +27,8 @@ class Impl : public ComponentBase {
     }
 
     bool Focusable() const final {
-        if(!toggled) return false;
+        if (!toggled)
+            return false;
         if (children_.size() == 0)
             return false;
         return children_[0]->Focusable();
