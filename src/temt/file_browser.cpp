@@ -14,8 +14,8 @@ using namespace ftxui;
 
 class FileBrowserImpl : public ComponentBase {
    public:
-    FileBrowserImpl(const std::string_view path, std::vector<temt::FileManip::FileInfo>& entries, int& data)
-        : usingPath_(path.data()), entries_(entries), selected_(data) {
+    FileBrowserImpl(const std::string_view path, std::vector<temt::FileManip::FileInfo>& entries, int& data, std::function<void()> openClosure)
+        : usingPath_(path.data()), entries_(entries), selected_(data), openFileClosure_(openClosure){
         SetBrowserPosition(usingPath_);
 
         menu_ = Menu(&entriesNames_, &selected_);
@@ -82,6 +82,8 @@ class FileBrowserImpl : public ComponentBase {
     std::shared_ptr<spdlog::logger> file_logger_ = spdlog::get("file_logger");
     ftxui::Component returnBtn_;
 
+    std::function<void()> openFileClosure_;
+
     void SetBrowserPosition(const std::string_view path) {
         usingPath_ = path.data();
 
@@ -118,6 +120,9 @@ class FileBrowserImpl : public ComponentBase {
         if (temt::FileManip::isExistingPath(newPath) && temt::FileManip::isDirectory(newPath)) {
             OpenDirectory(newPath);
         }
+        else{
+            openFileClosure_();
+        }
     }
 
     void openParentDirectory() {
@@ -131,6 +136,6 @@ class FileBrowserImpl : public ComponentBase {
     }
 };
 
-ftxui::Component FileBrowser(std::string_view path, std::vector<temt::FileManip::FileInfo>& entries, int& a) {
-    return ftxui::Make<FileBrowserImpl>(path, entries, a);
+ftxui::Component FileBrowser(std::string_view path, std::vector<temt::FileManip::FileInfo>& entries, int& a, std::function<void()> openClosure) {
+    return ftxui::Make<FileBrowserImpl>(path, entries, a, openClosure);
 }
