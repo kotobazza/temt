@@ -1,4 +1,5 @@
 #include "main_app.hpp"
+#include "FileManip.hpp"
 #include "file_browser.hpp"
 #include "hideable.hpp"
 
@@ -10,11 +11,14 @@ class Impl : public ComponentBase {
    public:
     Impl() {
         exec_path = std::filesystem::current_path().c_str();
-        fileBrowser_ = Hideable({FileBrowser(exec_path, selectedFileBrowser_)},
-                                hiddenFileBrowserPanel_);
+        fileBrowser_ =
+            Hideable({FileBrowser(exec_path, fileBrowserEntries_, selectedFileBrowser_)}, hiddenFileBrowserPanel_);
         upperPanel_ = Container::Horizontal(
             {Button(" < ", [&]() { hiddenFileBrowserPanel_ = !hiddenFileBrowserPanel_; }), Button("Menu", []() {}),
-             Button("Help", []() {}), Renderer([&](){return hbox({text("#>")|color(ftxui::Color::Yellow1), text(exec_path)});})|vcenter|bold, Renderer([]() { return filler(); }), Button(" ✖ ", []() {})});
+             Button("Help", []() {}),
+             Renderer([&]() { return hbox({text("#>") | color(ftxui::Color::Yellow1), text(exec_path)}); }) | vcenter |
+                 bold,
+             Renderer([]() { return filler(); }), Button(" ✖ ", []() {})});
 
         logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
 
@@ -34,10 +38,11 @@ class Impl : public ComponentBase {
 
     std::string exec_path;
 
+    std::vector<temt::FileManip::FileInfo> fileBrowserEntries_;
     int selectedFileBrowser_;
     bool hiddenFileBrowserPanel_ = true;
 };
 
 Component MainApp() {
-    return Make<Impl>()|flex;
+    return Make<Impl>() | flex;
 }
