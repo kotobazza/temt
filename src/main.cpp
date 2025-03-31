@@ -10,13 +10,19 @@
 #include "ftxui/component/screen_interactive.hpp"
 #include "main_app.hpp"
 
+void terminateApp(){
+    auto fileLogger = spdlog::get("file_logger");
+    fileLogger->flush();
+}
+
+
 int main() {
     temt::Log::createFileLogger("logs/logs.txt");
 
     auto screen = ftxui::ScreenInteractive::Fullscreen();
     
 
-    screen.Loop(MainApp());
+    screen.Loop(MainApp(terminateApp));
 
     return 0;
 }
