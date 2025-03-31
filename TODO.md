@@ -6,6 +6,8 @@
         + Include CI/CD processes
         + Incude better versioning and better structure of commits
 
+
+
 + Tasks
     + ~~Initial Installation and Libs~~
         + ~~README, TODO, CMakeLists.txt~~
@@ -17,9 +19,11 @@
         + ~~logging feature?~~
     
     + Move old custom-viewer to TeMT
+
         + ~~Redefine structure of namespaces and classes~~
             + Now i'll use namespace temt and subnamespaces for each feature of the TeMT
             + Static classes will be rebuilded into functions
+
         + Move old features to new namepsace structure
             + ~~FileManipulations~~
             + ~~ArchiveManipulations~~
@@ -27,15 +31,33 @@
             + Json/XML Serialization
                 + Rewrite Boost::PropertyTree to Cereal
             + Mine application class
+
         + Divide application class to subclasses and better structure
+            + ~~Created class FileBrowser that lets be used to process filesystem operations~~
+                + TODO: let MainApp have entires_ in them instead of FileBrowser. FileBrowser should have only a link to that object
+            + Create Upper Panel (should let FileBrowser disappear -> need an toggler for disappearing)
+            + Create Main Panel that will let work any other functionalities
+
         + Include tests for each feature
         + Write better CMakeLists with proper library structure and package generation
         + ~~Include logging for doubtful feats~~
 
-    + Points of processing UI
+        + ~~Emojis~~
+            + Needs more directive check of file types now
+
+
+    + Next steps:
+        + Create more modules for temt:
+            + Caesar Cipher
+            + IP-worker
+            + bin-hex-oct calculator
+            + Calculator
+                + Maybe with using ftxui::Canvas
+            + Chrome::Dino
+        + Define better structure for modules and open API for integrating the modules
         + Add library for working with YML
             + Settings in YML
-        + Define paths for settings for temt
-        + Smiles
+            + Define paths for settings for temt
+
 
 
