@@ -22,12 +22,24 @@ class Impl : public ComponentBase {
 
         logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
 
-        mainPanel_ = Renderer([]() { return vbox({text("HelloWrold"), filler()}); }) | border;
+        mainPanel_ = Renderer([]() {
+                         return vbox({
+                                    text("HelloWrold"),
+                                    text("HelloWrold"),
+                                    text("HelloWrold"),
+                                    text("HelloWrold"),
+                                    filler(),
+                                    text("HelloWrold"),
+                                }) |
+                                flex_grow;
+                     }) |
+                     border;
 
         Add(Container::Vertical(
-            {upperPanel_,
-             Container::Horizontal({fileBrowser_, Container::Vertical({mainPanel_ | flex, logPanel_}) | flex_grow}) |
-                 yflex}));
+                {upperPanel_, Container::Horizontal({fileBrowser_,
+                                                     Container::Vertical({mainPanel_, logPanel_}) | flex_grow}) |
+                                  flex}) |
+            flex);
     }
 
    private:
@@ -40,9 +52,9 @@ class Impl : public ComponentBase {
 
     std::vector<temt::FileManip::FileInfo> fileBrowserEntries_;
     int selectedFileBrowser_;
-    bool hiddenFileBrowserPanel_ = true;
+    bool hiddenFileBrowserPanel_ = false;
 };
 
 Component MainApp() {
-    return Make<Impl>() | flex;
+    return Make<Impl>();
 }
