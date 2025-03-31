@@ -10,16 +10,17 @@ using namespace ftxui;
 
 class Impl : public ComponentBase {
    public:
-    Impl(std::function<void()> exitClosure) : exitClosure_(exitClosure){
+    Impl(std::function<void()> exitClosure) : exitClosure_(exitClosure) {
         exec_path = std::filesystem::current_path().c_str();
-        fileBrowser_ =
-            Hideable({FileBrowser(exec_path, fileBrowserEntries_, selectedFileBrowser_, [this](){return OpenSelectedFile();})}, hiddenFileBrowserPanel_);
+        fileBrowser_ = Hideable({FileBrowser(exec_path, fileBrowserEntries_, selectedFileBrowser_,
+                                             [this]() { return OpenSelectedFile(); })},
+                                hiddenFileBrowserPanel_);
         upperPanel_ = Container::Horizontal(
             {Button(" < ", [&]() { hiddenFileBrowserPanel_ = !hiddenFileBrowserPanel_; }), Button("Menu", []() {}),
              Button("Help", []() {}),
              Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(exec_path)}); }) | vcenter |
                  bold,
-             Renderer([]() { return filler(); }), Button(" ✖ ", [this]() {exitClosure_();})});
+             Renderer([]() { return filler(); }), Button(" ✖ ", [this]() { exitClosure_(); })});
 
         logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
 
@@ -37,13 +38,13 @@ class Impl : public ComponentBase {
                      border;
 
         Add(Container::Vertical(
-                {upperPanel_, Container::Horizontal({fileBrowser_,
-                                                     Container::Vertical({mainPanel_, logPanel_}) | flex_grow}) |
-                                  flex}) |
+                {upperPanel_,
+                 Container::Horizontal({fileBrowser_, Container::Vertical({mainPanel_, logPanel_}) | flex_grow}) |
+                     flex}) |
             flex);
     }
 
-    void OpenSelectedFile(){
+    void OpenSelectedFile() {
         file_logger_->info("Selected file: {}", fileBrowserEntries_[selectedFileBrowser_].parentDirectory);
     }
 
@@ -59,7 +60,7 @@ class Impl : public ComponentBase {
 
     std::string exec_path;
     std::vector<temt::FileManip::FileInfo> fileBrowserEntries_;
-    int selectedFileBrowser_=0;
+    int selectedFileBrowser_ = 0;
     bool hiddenFileBrowserPanel_ = true;
 };
 
