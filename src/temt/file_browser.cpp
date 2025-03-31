@@ -14,7 +14,8 @@ using namespace ftxui;
 
 class FileBrowserImpl : public ComponentBase {
    public:
-    FileBrowserImpl(const std::string_view path, int& data) : usingPath_(path.data()), selected_(data) {
+    FileBrowserImpl(const std::string_view path, std::vector<temt::FileManip::FileInfo>& entries, int& data)
+        : usingPath_(path.data()), entries_(entries), selected_(data) {
         SetBrowserPosition(usingPath_);
 
         menu_ = Menu(&entriesNames_, &selected_);
@@ -25,7 +26,8 @@ class FileBrowserImpl : public ComponentBase {
     }
 
     Element OnRender() override final {
-        return vbox({hbox({returnBtn_->Render(), hbox({text("/> ")|color(ftxui::Color::Cyan), text(usingPath_) })| border | bold }),
+        return vbox({hbox({returnBtn_->Render(),
+                           hbox({text("/> ") | color(ftxui::Color::Cyan), text(usingPath_)}) | border | bold}),
                      menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_) |
                          focusPosition(0, selected_)}) |
                border;
@@ -70,7 +72,7 @@ class FileBrowserImpl : public ComponentBase {
    private:
     std::string usingPath_;
     std::vector<std::string> entriesNames_;
-    std::vector<temt::FileManip::FileInfo> entries_;
+    std::vector<temt::FileManip::FileInfo>& entries_;
     int& selected_;
     int last_selected_ = 0;
     ftxui::Component menu_;
@@ -129,6 +131,6 @@ class FileBrowserImpl : public ComponentBase {
     }
 };
 
-ftxui::Component FileBrowser(std::string_view path, int& a) {
-    return ftxui::Make<FileBrowserImpl>(path, a);
+ftxui::Component FileBrowser(std::string_view path, std::vector<temt::FileManip::FileInfo>& entries, int& a) {
+    return ftxui::Make<FileBrowserImpl>(path, entries, a);
 }
