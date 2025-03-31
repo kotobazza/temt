@@ -19,8 +19,6 @@ void terminateApp(){
     screen.Exit();
 }
 
-
-
 int main() {
     temt::Log::createFileLogger("logs/logs.txt");
 
