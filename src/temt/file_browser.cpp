@@ -95,8 +95,7 @@ class FileBrowserImpl : public ComponentBase {
             entriesNames_.push_back(temt::emoji::emojiedFileName(ent));
         }
 
-        file_logger_->info("FileBrowser: opened browser on new path: ", path);
-        file_logger_->flush();
+        file_logger_->info("FileBrowser: opened browser on new path: {}", path);
     }
 
     void OnDoubleClickEvent(const int selected) {
@@ -121,6 +120,7 @@ class FileBrowserImpl : public ComponentBase {
             OpenDirectory(newPath);
         }
         else{
+            file_logger_->info("FileBrowser: asks openFileClosure_ to open non-directory path: {}", newPath);
             openFileClosure_();
         }
     }
