@@ -2,16 +2,21 @@
 
 namespace temt {
 void AppData::NavigateToPath(std::string_view path) {
-    usingDirectorySelected_ = 0;
-    usingDirectoryEntries_.clear();
+    try {
+        usingDirectorySelected_ = 0;
+        usingDirectoryEntries_.clear();
 
-    for (auto entry : temt::FileManip::readDirectoryFlatEntries(path)) {
-        usingDirectoryEntries_.push_back(entry);
+        for (auto entry : temt::FileManip::readDirectoryFlatEntries(path)) {
+            usingDirectoryEntries_.push_back(entry);
+        }
+
+        current_path_ = path;
+
+        notify();
+    } catch (const std::exception& e) {
+        file_logger_->error("Navigation failed: {}", e.what());
+        //TODO: restoration?????
     }
-
-    current_path_ = path;
-
-    notify();
 }
 
 void AppData::notify() {
