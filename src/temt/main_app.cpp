@@ -24,7 +24,7 @@ class Impl : public ComponentBase {
                                 appData_.isFleBrowserPanelHidden_);
 
         upperPanel_ = Container::Horizontal(
-            {Button(" < ", [&]() { appData_.isFleBrowserPanelHidden_ = !appData_.isFleBrowserPanelHidden_; }),
+            {Button(" < ", [&]() { appData_.toggleFileBrowser(); }),
              Button("Menu", []() {}), Button("Help", []() {}), Button("Stats", []() {}),
              Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(appData_.exec_path_)}); }) |
                  vcenter | bold,
@@ -43,7 +43,7 @@ class Impl : public ComponentBase {
 
     void OpenSelectedFile() {
         appData_.file_logger_->info("Selected file: {}",
-                           appData_.usingDirectoryEntries_[appData_.usingDirectorySelected_].parentDirectory);
+                           appData_.usingDirectoryEntries_[appData_.usingDirectorySelectedIndex()].parentDirectory);
     }
 
    private:
