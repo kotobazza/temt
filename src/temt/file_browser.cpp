@@ -52,10 +52,12 @@ class FileBrowserImpl : public ComponentBase {
                 auto time_since_last_click =
                     std::chrono::duration_cast<std::chrono::milliseconds>(now - lastClickTime_).count();
 
-                if (time_since_last_click < appData_.doubleClickDelay_parameter &&  
-                    last_selected_ == appData_.usingDirectorySelectedIndex()) {
-                    OpenSelectedEntry(appData_.usingDirectorySelectedIndex());
-                    lastDoubleClicked_ = appData_.usingDirectorySelectedIndex();
+                int appdata_selected = appData_.usingDirectorySelectedIndex();
+
+                if (time_since_last_click < appData_.doubleClickDelay_parameter &&
+                    last_selected_ == appdata_selected) {  // TODO: parameter
+                    OpenSelectedEntry(appdata_selected);
+                    lastDoubleClicked_ = appdata_selected;
 
                     return true;
                 }
@@ -79,17 +81,17 @@ class FileBrowserImpl : public ComponentBase {
 
    private:
     temt::AppData& appData_;
-    std::vector<std::string> entriesNames_;
+    std::function<void()> openFileClosure_;
 
+    std::vector<std::string> entriesNames_;
     int last_selected_ = 0;
-    ftxui::Component menu_;
-    ftxui::Box menuBox_;
     int lastDoubleClicked_ = 0;
     std::chrono::steady_clock::time_point lastClickTime_;
 
+    ftxui::Component menu_;
     ftxui::Component returnBtn_;
 
-    std::function<void()> openFileClosure_;
+    ftxui::Box menuBox_;
 
     void OpenSelectedEntry(const int selected) {
         if (!(selected >= 0 && selected < static_cast<int>(appData_.usingDirectoryEntries_.size()))) {
