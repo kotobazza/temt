@@ -17,15 +17,13 @@ class FileBrowserImpl : public ComponentBase {
    public:
     FileBrowserImpl(temt::AppData& appData, std::function<void()> openClosure)
         : appData_(appData), openFileClosure_(openClosure) {
-        
-
         for (auto entry : appData_.usingDirectoryEntries_) {
             entriesNames_.push_back(temt::emoji::emojiedFileName(entry));
         }
 
-        menu_ = Menu(&entriesNames_, &appData_.usingDirectorySelected_);
+        menu_ = Menu(&entriesNames_, &appData_.usingDirectorySelectedIndex());
 
-        returnBtn_ = BorderlessButton("  ../", [this]() { openParentDirectory(); }) | bold;
+        returnBtn_ = BorderlessButton("  ../", [this]() { ОpenParentDirectory(); }) | bold;
 
         Add(Container::Vertical({returnBtn_, menu_}));
     }
@@ -35,11 +33,12 @@ class FileBrowserImpl : public ComponentBase {
         for (auto entry : appData_.usingDirectoryEntries_) {
             entriesNames_.push_back(temt::emoji::emojiedFileName(entry));
         }
+
         return vbox({hbox({text("/> ") | color(ftxui::Color::Cyan), text(appData_.current_path_) | underlined}) |
                          borderEmpty | bold,
                      returnBtn_->Render(),
                      menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_) |
-                         focusPosition(0, appData_.usingDirectorySelected_)}) |
+                         focusPosition(0, appData_.usingDirectorySelectedIndex())}) |
                border | yflex;
     }
 
@@ -53,15 +52,15 @@ class FileBrowserImpl : public ComponentBase {
                 auto time_since_last_click =
                     std::chrono::duration_cast<std::chrono::milliseconds>(now - lastClickTime_).count();
 
-                if (time_since_last_click < 500 &&  // TODO: remove 500 and set it as parameter
-                    last_selected_ == appData_.usingDirectorySelected_) {
-                    OnDoubleClickEvent(appData_.usingDirectorySelected_);
-                    lastDoubleClicked_ = appData_.usingDirectorySelected_;
+                if (time_since_last_click < appData_.doubleClickDelay_parameter &&  
+                    last_selected_ == appData_.usingDirectorySelectedIndex()) {
+                    OpenSelectedEntry(appData_.usingDirectorySelectedIndex());
+                    lastDoubleClicked_ = appData_.usingDirectorySelectedIndex();
 
                     return true;
                 }
                 lastClickTime_ = now;
-                last_selected_ = appData_.usingDirectorySelected_;
+                last_selected_ = appData_.usingDirectorySelectedIndex();
                 return false;
             }
         }
@@ -69,7 +68,7 @@ class FileBrowserImpl : public ComponentBase {
             if (returnBtn_->Active()) {
                 return ComponentBase::OnEvent(event);
             }
-            OpenPath(appData_.usingDirectorySelected_);
+            OpenSelectedEntry(appData_.usingDirectorySelectedIndex());
             return true;
         }
 
@@ -87,25 +86,15 @@ class FileBrowserImpl : public ComponentBase {
     ftxui::Box menuBox_;
     int lastDoubleClicked_ = 0;
     std::chrono::steady_clock::time_point lastClickTime_;
-    
+
     ftxui::Component returnBtn_;
 
     std::function<void()> openFileClosure_;
 
-    void OnDoubleClickEvent(const int selected) {
-        if (!appData_.file_logger_) {
-            spdlog::critical("no filelogger");
-            return;
-        }
-
+    void OpenSelectedEntry(const int selected) {
         if (!(selected >= 0 && selected < static_cast<int>(appData_.usingDirectoryEntries_.size()))) {
             return;
         }
-
-        OpenPath(selected);
-    }
-
-    void OpenPath(const int selected) {
         auto entry = appData_.usingDirectoryEntries_[selected];
 
         std::string newPath = temt::FileManip::assemblePath(entry.parentDirectory, entry.path);
@@ -118,7 +107,7 @@ class FileBrowserImpl : public ComponentBase {
         }
     }
 
-    void openParentDirectory() { appData_.NavigateToPath(temt::FileManip::getParentPath(appData_.current_path_)); }
+    void ОpenParentDirectory() { appData_.NavigateToPath(temt::FileManip::getParentPath(appData_.current_path_)); }
 
     void OpenDirectory(const std::string_view path) { appData_.NavigateToPath(path); }
 };
