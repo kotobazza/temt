@@ -7,6 +7,7 @@
 #include "spdlog/spdlog.h"
 
 #include "FileManip.hpp"
+#include "borderless_button.hpp"
 #include "emoji_util.hpp"
 #include "file_browser.hpp"
 
@@ -14,23 +15,27 @@ using namespace ftxui;
 
 class FileBrowserImpl : public ComponentBase {
    public:
-    FileBrowserImpl(const std::string_view path, std::vector<temt::FileManip::FileInfo>& entries, int& data, std::function<void()> openClosure)
-        : usingPath_(path.data()), entries_(entries), selected_(data), openFileClosure_(openClosure){
+    FileBrowserImpl(const std::string_view path,
+                    std::vector<temt::FileManip::FileInfo>& entries,
+                    int& data,
+                    std::function<void()> openClosure)
+        : usingPath_(path.data()), entries_(entries), selected_(data), openFileClosure_(openClosure) {
         SetBrowserPosition(usingPath_);
 
         menu_ = Menu(&entriesNames_, &selected_);
 
-        returnBtn_ = Button("◀ ", [this]() { openParentDirectory(); }) | bold;
+        returnBtn_ = BorderlessButton("  ../", [this]() { openParentDirectory(); }) | bold;
 
         Add(Container::Vertical({returnBtn_, menu_}));
     }
 
     Element OnRender() override final {
-        return vbox({hbox({returnBtn_->Render(),
-                           hbox({text("/> ") | color(ftxui::Color::Cyan), text(usingPath_)}) | border | bold}),
-                     menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_) |
-                         focusPosition(0, selected_)}) |
-               border|yflex;
+        return vbox(
+                   {hbox({text("/> ") | color(ftxui::Color::Cyan), text(usingPath_) | underlined}) | borderEmpty | bold,
+                    returnBtn_->Render(),
+                    menu_->Render() | vscroll_indicator | yframe | flex | reflect(menuBox_) |
+                        focusPosition(0, selected_)}) |
+               border | yflex;
     }
 
     bool OnEvent(Event event) override final {
@@ -118,8 +123,7 @@ class FileBrowserImpl : public ComponentBase {
 
         if (temt::FileManip::isExistingPath(newPath) && temt::FileManip::isDirectory(newPath)) {
             OpenDirectory(newPath);
-        }
-        else{
+        } else {
             file_logger_->info("FileBrowser: asks openFileClosure_ to open non-directory path: {}", newPath);
             openFileClosure_();
         }
@@ -136,6 +140,9 @@ class FileBrowserImpl : public ComponentBase {
     }
 };
 
-ftxui::Component FileBrowser(std::string_view path, std::vector<temt::FileManip::FileInfo>& entries, int& a, std::function<void()> openClosure) {
+ftxui::Component FileBrowser(std::string_view path,
+                             std::vector<temt::FileManip::FileInfo>& entries,
+                             int& a,
+                             std::function<void()> openClosure) {
     return ftxui::Make<FileBrowserImpl>(path, entries, a, openClosure);
 }
