@@ -2,6 +2,7 @@
 #include "FileManip.hpp"
 #include "file_browser.hpp"
 #include "hideable.hpp"
+#include "main_panel.hpp"
 #include "spdlog/spdlog.h"
 
 #include <filesystem>
@@ -24,18 +25,7 @@ class Impl : public ComponentBase {
 
         logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
 
-        mainPanel_ = Renderer([]() {
-                         return vbox({
-                                    text("HelloWrold"),
-                                    text("HelloWrold"),
-                                    text("HelloWrold"),
-                                    text("HelloWrold"),
-                                    filler(),
-                                    text("HelloWrold"),
-                                }) |
-                                flex_grow;
-                     }) |
-                     border;
+        mainPanel_ = MainPanel();
 
         Add(Container::Vertical(
                 {upperPanel_,
