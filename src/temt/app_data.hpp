@@ -12,11 +12,12 @@ class AppData {
     std::string exec_path_;
     std::string current_path_;
     std::vector<temt::FileManip::FileInfo> usingDirectoryEntries_{};
-    int usingDirectoriesSelected_ = 0;
-    bool isBrowserPanelHidden_ = false;
+    int usingDirectorySelected_ = 0;
+    bool isFleBrowserPanelHidden_ = false;
+    std::shared_ptr<spdlog::logger> file_logger_ = spdlog::get("file_logger");
 
     void NavigateToPath(std::string_view path);
-    void add_listener(std::function<void()> listener) { listeners.push_back(listener); }
+    void AddListener(std::function<void()> listener) { listeners.push_back(listener); }
 
    private:
     std::vector<std::function<void()>> listeners{};

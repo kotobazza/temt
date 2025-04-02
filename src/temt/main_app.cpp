@@ -5,23 +5,29 @@
 #include "main_panel.hpp"
 #include "spdlog/spdlog.h"
 
+#include "ftxui/component/event.hpp"
+#include "ftxui/component/screen_interactive.hpp"
+
+#include "app_data.hpp"
+
 #include <filesystem>
 
 using namespace ftxui;
 
 class Impl : public ComponentBase {
    public:
-    Impl(std::function<void()> exitClosure) : exitClosure_(exitClosure) {
-        exec_path = std::filesystem::current_path().c_str();
-        fileBrowser_ = Hideable({FileBrowser(exec_path, fileBrowserEntries_, selectedFileBrowser_,
-                                             [this]() { return OpenSelectedFile(); })},
-                                hiddenFileBrowserPanel_);
+    Impl(std::function<void()> exitClosure)
+        : appData_(std::filesystem::current_path().c_str()), exitClosure_(exitClosure) {
+        appData_.AddListener([this]() { ScreenInteractive::Active()->Post(ftxui::Event::Custom); });
+
+        fileBrowser_ = Hideable({FileBrowser(appData_, [this]() { return OpenSelectedFile(); })},
+                                appData_.isFleBrowserPanelHidden_);
+
         upperPanel_ = Container::Horizontal(
-            {Button(" < ", [&]() { hiddenFileBrowserPanel_ = !hiddenFileBrowserPanel_; }), Button("Menu", []() {}),
-             Button("Help", []() {}),
-             Button("Stats", [](){}),
-             Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(exec_path)}); }) | vcenter |
-                 bold,
+            {Button(" < ", [&]() { appData_.isFleBrowserPanelHidden_ = !appData_.isFleBrowserPanelHidden_; }),
+             Button("Menu", []() {}), Button("Help", []() {}), Button("Stats", []() {}),
+             Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(appData_.exec_path_)}); }) |
+                 vcenter | bold,
              Renderer([]() { return filler(); }), Button(" ✖ ", [this]() { exitClosure_(); })});
 
         logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
@@ -36,7 +42,8 @@ class Impl : public ComponentBase {
     }
 
     void OpenSelectedFile() {
-        file_logger_->info("Selected file: {}", fileBrowserEntries_[selectedFileBrowser_].parentDirectory);
+        appData_.file_logger_->info("Selected file: {}",
+                           appData_.usingDirectoryEntries_[appData_.usingDirectorySelected_].parentDirectory);
     }
 
    private:
@@ -45,14 +52,9 @@ class Impl : public ComponentBase {
     ftxui::Component mainPanel_;
     ftxui::Component logPanel_;
 
+    temt::AppData appData_;
+
     std::function<void()> exitClosure_;
-
-    std::shared_ptr<spdlog::logger> file_logger_ = spdlog::get("file_logger");
-
-    std::string exec_path;
-    std::vector<temt::FileManip::FileInfo> fileBrowserEntries_;
-    int selectedFileBrowser_ = 0;
-    bool hiddenFileBrowserPanel_ = true;
 };
 
 Component MainApp(std::function<void()> exitClosure) {
