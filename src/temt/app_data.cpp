@@ -2,7 +2,7 @@
 
 namespace temt {
 void AppData::NavigateToPath(std::string_view path) {
-    usingDirectoriesSelected_ = 0;
+    usingDirectorySelected_ = 0;
     usingDirectoryEntries_.clear();
 
     for (auto entry : temt::FileManip::readDirectoryFlatEntries(path)) {
