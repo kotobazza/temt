@@ -19,6 +19,7 @@ class Impl : public ComponentBase {
         upperPanel_ = Container::Horizontal(
             {Button(" < ", [&]() { hiddenFileBrowserPanel_ = !hiddenFileBrowserPanel_; }), Button("Menu", []() {}),
              Button("Help", []() {}),
+             Button("Stats", [](){}),
              Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(exec_path)}); }) | vcenter |
                  bold,
              Renderer([]() { return filler(); }), Button(" ✖ ", [this]() { exitClosure_(); })});
