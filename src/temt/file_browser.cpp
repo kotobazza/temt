@@ -23,7 +23,7 @@ class FileBrowserImpl : public ComponentBase {
 
         menu_ = Menu(&entriesNames_, &appData_.usingDirectorySelectedIndex());
 
-        returnBtn_ = BorderlessButton("  ../", [this]() { ОpenParentDirectory(); }) | bold;
+        returnBtn_ = BorderlessButton("  ⬅  ../", [this]() { ОpenParentDirectory(); }) | bold;
 
         Add(Container::Vertical({returnBtn_, menu_}));
     }
