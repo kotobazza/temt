@@ -14,9 +14,9 @@
 
 using namespace ftxui;
 
-class Impl : public ComponentBase {
+class MainAppImpl : public ComponentBase {
    public:
-    Impl(std::function<void()> exitClosure)
+    MainAppImpl(std::function<void()> exitClosure)
         : appData_(std::filesystem::current_path().c_str()), exitClosure_(exitClosure) {
         appData_.AddListener([this]() { ScreenInteractive::Active()->Post(ftxui::Event::Custom); });
 
@@ -64,5 +64,5 @@ class Impl : public ComponentBase {
 };
 
 Component MainApp(std::function<void()> exitClosure) {
-    return Make<Impl>(exitClosure);
+    return Make<MainAppImpl>(exitClosure);
 }
