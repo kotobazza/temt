@@ -23,7 +23,8 @@ class MainAppImpl : public ComponentBase {
         fileBrowser_ = FileBrowser(appData_, [this]() { return OpenSelectedFile(); });
 
         upperPanel_ = Container::Horizontal(
-            {Button(" < ", [&]() { appData_.toggleFileBrowser(); }), Button("Menu", []() {}), Button("Help", []() {}),
+            {Button(" < ", [&]() { appData_.toggleFileBrowser(); }),
+             Button("Menu", [this]() { appData_.toggleOptionsMenu(); }), Button("Help", []() {}),
              Button("Stats", []() {}),
              Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(appData_.exec_path_)}); }) |
                  vcenter | bold,
@@ -35,9 +36,14 @@ class MainAppImpl : public ComponentBase {
 
         auto rightPanel = Container::Vertical({mainPanel_, logPanel_});
 
-        auto resizableSplit_ = ResizableSplitLeft(fileBrowser_, rightPanel, &appData_.mainAppSplitLength_);
+        auto resizableSplit = ResizableSplitLeft(fileBrowser_, rightPanel, &appData_.mainAppSplitLength_);
 
-        Add(Container::Vertical({upperPanel_, resizableSplit_ | flex}));
+        auto main =
+            Container::Vertical({upperPanel_, resizableSplit | flex}) |
+            Modal(Container::Vertical({Button("Exit", [this](){appData_.toggleOptionsMenu();})}),
+                  &appData_.modalShowOptionsMenu);
+
+        Add(main);
 
         // Add(Container::Vertical(
         //         {upperPanel_,
