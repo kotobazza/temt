@@ -20,30 +20,36 @@ class Impl : public ComponentBase {
         : appData_(std::filesystem::current_path().c_str()), exitClosure_(exitClosure) {
         appData_.AddListener([this]() { ScreenInteractive::Active()->Post(ftxui::Event::Custom); });
 
-        fileBrowser_ = Hideable({FileBrowser(appData_, [this]() { return OpenSelectedFile(); })},
-                                appData_.isFleBrowserPanelHidden_);
+        fileBrowser_ = FileBrowser(appData_, [this]() { return OpenSelectedFile(); });
 
         upperPanel_ = Container::Horizontal(
-            {Button(" < ", [&]() { appData_.toggleFileBrowser(); }),
-             Button("Menu", []() {}), Button("Help", []() {}), Button("Stats", []() {}),
+            {Button(" < ", [&]() { appData_.toggleFileBrowser(); }), Button("Menu", []() {}), Button("Help", []() {}),
+             Button("Stats", []() {}),
              Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(appData_.exec_path_)}); }) |
                  vcenter | bold,
              Renderer([]() { return filler(); }), Button(" ✖ ", [this]() { exitClosure_(); })});
 
         logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
 
-        mainPanel_ = MainPanel({Button("Hello", [](){}), Renderer([](){return text("Hello2")|border;})});
+        mainPanel_ = Container::Vertical({Button("Hello", []() {}), Renderer([]() { return text("Hello2") | border; })})|flex|border;
 
-        Add(Container::Vertical(
-                {upperPanel_,
-                 Container::Horizontal({fileBrowser_, Container::Vertical({mainPanel_, logPanel_}) | flex_grow}) |
-                     flex}) |
-            flex);
+        auto rightPanel = Container::Vertical({mainPanel_, logPanel_});
+
+        auto resizableSplit_ = ResizableSplitLeft(fileBrowser_, rightPanel, &appData_.mainAppSplitLength_);
+
+        Add(Container::Vertical({upperPanel_, resizableSplit_ | flex}) | flex);
+
+        // Add(Container::Vertical(
+        //         {upperPanel_,
+        //          Container::Horizontal({fileBrowser_, Container::Vertical({mainPanel_, logPanel_}) | flex_grow}) |
+        //              flex}) |
+        //     flex);
     }
 
     void OpenSelectedFile() {
-        appData_.file_logger_->info("Selected file: {}",
-                           appData_.usingDirectoryEntries_[appData_.usingDirectorySelectedIndex()].parentDirectory);
+        appData_.file_logger_->info(
+            "Selected file: {}",
+            appData_.usingDirectoryEntries_[appData_.usingDirectorySelectedIndex()].parentDirectory);
     }
 
    private:

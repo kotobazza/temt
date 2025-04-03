@@ -13,19 +13,25 @@ class AppData {
     std::string current_path_;
     std::vector<temt::FileManip::FileInfo> usingDirectoryEntries_{};
 
-    bool isFleBrowserPanelHidden_ = true;
     std::shared_ptr<spdlog::logger> file_logger_ = spdlog::get("file_logger");
 
-    int doubleClickDelay_parameter = 500; //create class for settings
+    int doubleClickDelay_parameter = 500;  // create class for settings
+
+    int mainAppSplitLength_ = 40;  // parameter defined by settings and terminal size
 
     int& usingDirectorySelectedIndex() { return usingDirectorySelected_; }
     void setUsingDirectorySelectedIndex(int idx) { usingDirectorySelected_ = idx; }
     void NavigateToPath(std::string_view path);
     void AddListener(std::function<void()> listener) { listeners.push_back(listener); }
-    void toggleFileBrowser() {isFleBrowserPanelHidden_ = !isFleBrowserPanelHidden_;}
+    void toggleFileBrowser() {
+        int t = mainAppSplitLength_;
+        mainAppSplitLength_ = mainAppSplitLengthSaved_;
+        mainAppSplitLengthSaved_ = t;
+    }
 
    private:
     int usingDirectorySelected_ = 0;
+    int mainAppSplitLengthSaved_ = 0;
     std::vector<std::function<void()>> listeners{};
     void notify();
 };
