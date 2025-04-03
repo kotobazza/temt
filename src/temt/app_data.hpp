@@ -19,6 +19,8 @@ class AppData {
 
     int mainAppSplitLength_ = 40;  // parameter defined by settings and terminal size
 
+    bool modalShowOptionsMenu = false;
+
     int& usingDirectorySelectedIndex() { return usingDirectorySelected_; }
     void setUsingDirectorySelectedIndex(int idx) { usingDirectorySelected_ = idx; }
     void NavigateToPath(std::string_view path);
@@ -27,6 +29,10 @@ class AppData {
         int t = mainAppSplitLength_;
         mainAppSplitLength_ = mainAppSplitLengthSaved_;
         mainAppSplitLengthSaved_ = t;
+    }
+
+    void toggleOptionsMenu(){
+        modalShowOptionsMenu = !modalShowOptionsMenu;
     }
 
    private:
