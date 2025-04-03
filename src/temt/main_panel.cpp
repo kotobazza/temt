@@ -1,13 +1,13 @@
 #include "main_panel.hpp"
-
+#include <cassert>
 #include "ftxui/component/event.hpp"
 
 using namespace ftxui;
 
 class Impl : public ComponentBase {
    public:
-    Impl(ftxui::Components children) {
-        for (auto child : children) {
+    Impl(Components children){
+        for (Component& child : children) {
             Add(child);
         }
     }
@@ -19,11 +19,12 @@ class Impl : public ComponentBase {
         }
     }
 
-    Element OnRender() {
+    Element OnRender() override final {
         Elements elements;
         for (auto& child : children_) {
             elements.push_back(child->Render());
         }
+        // Reverse the order of the elements.
         return vbox(std::move(elements));
     }
 
@@ -39,6 +40,25 @@ class Impl : public ComponentBase {
         return children_[0];
     }
 
+    void SetActiveChild(ComponentBase* child) final {
+        if (children_.size() == 0) {
+            return;
+        }
+
+        int previous_index = 0;
+        for (size_t i = 0; i < children_.size(); ++i) {
+            if (children_[i].get() == child) {
+                previous_index = i;
+                break;
+            }
+        }
+
+        // Rotate to make the `previous_index` become the first element.
+        std::rotate(children_.begin(), children_.begin() + previous_index, children_.end());
+
+        assert(ActiveChild().get() == child);
+    }
+
     bool OnEvent(Event event) final {
         for (auto& child : children_) {
             if (child->OnEvent(event)) {
@@ -47,14 +67,12 @@ class Impl : public ComponentBase {
         }
         return false;
     }
-
-   private:
-    ftxui::Component mainContainer_;
 };
 
 ftxui::Component MainPanel(ftxui::Components childs) {
-    return Make<Impl>(childs) | flex_grow | border;
+    return Make<Impl>(childs) | flex | border;
 };
+
 
 void UpdateChildren(Component main_panel, ftxui::Components new_children) {
     if (auto impl = dynamic_cast<Impl*>(main_panel.get())) {
