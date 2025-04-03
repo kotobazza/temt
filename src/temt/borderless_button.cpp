@@ -3,19 +3,16 @@
 #include "ftxui/dom/elements.hpp"
 using namespace ftxui;
 
-class NoBorderButton : public ComponentBase {
+class BorderlessButtonImpl : public ComponentBase {
    public:
-    NoBorderButton(std::string label, std::function<void()> on_click) : label_(label), on_click_(on_click) {}
+    BorderlessButtonImpl(std::string label, std::function<void()> on_click) : label_(label), on_click_(on_click) {}
 
     Element OnRender() override {
         bool is_hovered = hovered_ || active_;
         bool is_focused = Focused();
 
-        return text(label_) 
-                | (is_hovered || is_focused ? inverted : nothing) 
-                | (is_focused ? focus : nothing) 
-                | (!(is_hovered || is_focused) ? dim : nothing) 
-                | reflect(box_);
+        return text(label_) | (is_hovered || is_focused ? inverted : nothing) | (is_focused ? focus : nothing) |
+               (!(is_hovered || is_focused) ? dim : nothing) | reflect(box_);
     }
 
     // Обработка событий
@@ -65,5 +62,5 @@ class NoBorderButton : public ComponentBase {
 };
 
 Component BorderlessButton(std::string label, std::function<void()> on_click) {
-    return Make<NoBorderButton>(label, on_click);
+    return Make<BorderlessButtonImpl>(label, on_click);
 }
