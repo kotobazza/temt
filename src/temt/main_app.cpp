@@ -37,7 +37,7 @@ class MainAppImpl : public ComponentBase {
 
         auto resizableSplit_ = ResizableSplitLeft(fileBrowser_, rightPanel, &appData_.mainAppSplitLength_);
 
-        Add(Container::Vertical({upperPanel_, resizableSplit_ | flex}) | flex);
+        Add(Container::Vertical({upperPanel_, resizableSplit_ | flex}));
 
         // Add(Container::Vertical(
         //         {upperPanel_,
