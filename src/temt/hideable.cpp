@@ -6,9 +6,9 @@
 
 using namespace ftxui;
 
-class Impl : public ComponentBase {
+class HideableImpl : public ComponentBase {
    public:
-    Impl(Components children, bool& toggle) : toggled(toggle) {
+    HideableImpl(Components children, bool& toggle) : toggled(toggle) {
         for (Component& child : children) {
             Add(child);
         }
@@ -73,5 +73,5 @@ class Impl : public ComponentBase {
 };
 
 Component Hideable(Components children, bool& toggle) {
-    return Make<Impl>(children, toggle);
+    return Make<HideableImpl>(children, toggle);
 }
