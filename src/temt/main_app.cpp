@@ -31,7 +31,7 @@ class Impl : public ComponentBase {
 
         logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
 
-        mainPanel_ = Container::Vertical({Button("Hello", []() {}), Renderer([]() { return text("Hello2") | border; })})|flex|border;
+        mainPanel_ = MainPanel({Button("Hello", []() {}), Renderer([]() { return text("Hello2") | border; })});
 
         auto rightPanel = Container::Vertical({mainPanel_, logPanel_});
 

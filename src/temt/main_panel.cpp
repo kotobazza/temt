@@ -4,9 +4,9 @@
 
 using namespace ftxui;
 
-class Impl : public ComponentBase {
+class MainPanelImpl : public ComponentBase {
    public:
-    Impl(Components children){
+    MainPanelImpl(Components children) {
         for (Component& child : children) {
             Add(child);
         }
@@ -70,12 +70,11 @@ class Impl : public ComponentBase {
 };
 
 ftxui::Component MainPanel(ftxui::Components childs) {
-    return Make<Impl>(childs) | flex | border;
+    return Make<MainPanelImpl>(childs) | flex | border;
 };
 
-
 void UpdateChildren(Component main_panel, ftxui::Components new_children) {
-    if (auto impl = dynamic_cast<Impl*>(main_panel.get())) {
+    if (auto impl = dynamic_cast<MainPanelImpl*>(main_panel.get())) {
         impl->SetChildren(std::move(new_children));
     }
 }
