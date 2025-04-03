@@ -6,3 +6,4 @@
 ftxui::Component MainPanel(ftxui::Components childs);
 
 void UpdateChildren(ftxui::Component main_panel, ftxui::Components new_children);
+

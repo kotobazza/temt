@@ -32,7 +32,7 @@ class Impl : public ComponentBase {
 
         logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
 
-        mainPanel_ = MainPanel();
+        mainPanel_ = MainPanel({Button("Hello", [](){}), Renderer([](){return text("Hello2")|border;})});
 
         Add(Container::Vertical(
                 {upperPanel_,
