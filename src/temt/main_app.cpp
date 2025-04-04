@@ -9,6 +9,7 @@
 #include "ftxui/component/screen_interactive.hpp"
 
 #include "app_data.hpp"
+#include "text_writer.hpp"
 
 #include <filesystem>
 
@@ -20,28 +21,27 @@ class MainAppImpl : public ComponentBase {
         : appData_(std::filesystem::current_path().c_str()), exitClosure_(exitClosure) {
         appData_.AddListener([this]() { ScreenInteractive::Active()->Post(ftxui::Event::Custom); });
 
-        fileBrowser_ = FileBrowser(appData_, [this]() { return OpenSelectedFile(); });
+        fileBrowser_ = FileBrowser(appData_, [this]() { OpenSelectedFile(); });
 
         upperPanel_ = Container::Horizontal(
             {Button(" < ", [&]() { appData_.toggleFileBrowser(); }),
              Button("Menu", [this]() { appData_.toggleOptionsMenu(); }), Button("Help", []() {}),
-             Button("Stats", []() {}),
+             Button("Stats", [this]() { OpenSelectedFile(); }),
              Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(appData_.exec_path_)}); }) |
                  vcenter | bold,
              Renderer([]() { return filler(); }), Button(" ✖ ", [this]() { exitClosure_(); })});
 
-        logPanel_ = Renderer([]() { return text("Logs:"); }) | border;
+        logPanel_ = Renderer([]() { return text("Logs:"); });
 
-        mainPanel_ = MainPanel({Button("Hello", []() {}), Renderer([]() { return text("Hello2") | border; })});
+        mainPanel_ = Container::Vertical({Renderer([]() { return vbox(text("Nothing selected")) | center; }) | flex});
 
-        auto rightPanel = Container::Vertical({mainPanel_, logPanel_});
+        auto rightPanel = Container::Vertical({mainPanel_ | border | flex, logPanel_ | border});
 
         auto resizableSplit = ResizableSplitLeft(fileBrowser_, rightPanel, &appData_.mainAppSplitLength_);
 
-        auto main =
-            Container::Vertical({upperPanel_, resizableSplit | flex}) |
-            Modal(Container::Vertical({Button("Exit", [this](){appData_.toggleOptionsMenu();})}),
-                  &appData_.modalShowOptionsMenu);
+        auto main = Container::Vertical({upperPanel_, resizableSplit | flex}) |
+                    Modal(Container::Vertical({Button("Exit", [this]() { appData_.toggleOptionsMenu(); })}),
+                          &appData_.modalShowOptionsMenu);
 
         Add(main);
 
@@ -53,9 +53,17 @@ class MainAppImpl : public ComponentBase {
     }
 
     void OpenSelectedFile() {
-        appData_.file_logger_->info(
-            "Selected file: {}",
-            appData_.usingDirectoryEntries_[appData_.usingDirectorySelectedIndex()].parentDirectory);
+        appData_.file_logger_->info("Selected file: {}",
+                                    appData_.usingDirectoryEntries_[appData_.usingDirectorySelectedIndex()].path);
+        mainPanel_->Add(TextWriter(appData_, [this]() { ExitFromTextEditor(); }));
+
+    }
+
+    void SetMainPanelChild() {}
+
+    void ExitFromTextEditor() {
+        appData_.file_logger_->info("Exited From TextViewer");
+        appData_.file_logger_->flush();
     }
 
    private:
