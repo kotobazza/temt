@@ -35,6 +35,10 @@ class AppData {
         modalShowOptionsMenu = !modalShowOptionsMenu;
     }
 
+    temt::FileManip::FileInfo selectedEntry(){
+        return usingDirectoryEntries_[usingDirectorySelected_];
+    }
+
    private:
     int usingDirectorySelected_ = 0;
     int mainAppSplitLengthSaved_ = 0;
