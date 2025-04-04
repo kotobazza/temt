@@ -55,6 +55,7 @@ class MainAppImpl : public ComponentBase {
     void OpenSelectedFile() {
         appData_.file_logger_->info("Selected file: {}",
                                     appData_.usingDirectoryEntries_[appData_.usingDirectorySelectedIndex()].path);
+        mainPanel_->DetachAllChildren();
         mainPanel_->Add(TextWriter(appData_, [this]() { ExitFromTextEditor(); }));
 
     }
