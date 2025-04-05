@@ -142,45 +142,78 @@ struct TextBuffer {
     }
 };
 
+std::string AlignNumberLeft(int number, size_t width) {
+    std::ostringstream oss;
+    oss << std::setw(width) << std::right << number;
+    return oss.str();
+}
+
 class TextWriterImpl : public ComponentBase {
    public:
     TextWriterImpl(temt::AppData& appData, std::function<void()> exitClosure) : exitClosure_(exitClosure) {
         temt::FileManip::FileInfo dirEntry = appData.selectedEntry();
-        std::string filepath = temt::FileManip::assemblePath(dirEntry.parentDirectory, dirEntry.path);
+        original_filepath = temt::FileManip::assemblePath(dirEntry.parentDirectory, dirEntry.path);
 
-        if (textBuffer_.LoadFromFile(filepath)) {
-            appData.file_logger_->info("Loaded file: {}", filepath);
+        if (textBuffer_.LoadFromFile(original_filepath)) {
+            appData.file_logger_->info("Loaded file: {}", original_filepath);
             is_opened_file_ = true;
-
         } else {
-            appData.file_logger_->info("Failed to load file: {}", filepath);
+            appData.file_logger_->error("Failed to load file: {}", original_filepath);
             is_opened_file_ = false;
         }
 
-        textSource_ = Renderer([this]() {
-            auto lines = textBuffer_.SplitLines();
-            Elements text_lines;
-            for (size_t i = 0; i < lines.size(); ++i) {
-                auto line_number = text(std::to_string(i + 1) + " ") | dim;
-                auto line_text = text(lines[i]);
-                text_lines.push_back(hbox({line_number, line_text}));
-            }
+        textSource_ =
+            CatchEvent(Renderer([this]() {
+                           auto lines = textBuffer_.SplitLines();
+                           auto [cursor_line, cursor_col] = textBuffer_.CursorLineCol();
 
-            return vbox(text_lines) | flex;
-        });
+                           Elements text_lines;
+                           for (size_t i = 0; i < lines.size(); ++i) {
+                               auto line_number = text(AlignNumberLeft(i + 1, 3));
+                               if (cursor_line != static_cast<int>(i)) {
+                                   line_number |= dim;
+                               }
+
+                               Element line_text;
+
+                               if ((int)i == cursor_line) {
+                                   std::string& line = lines[i];
+                                   if (cursor_col >= (int)line.size()) {
+                                       line_text = hbox({text(line), text(" ") | inverted});
+                                   } else {
+                                       line_text = hbox({text(line.substr(0, cursor_col)),
+                                                         text(std::string(1, line[cursor_col])) | inverted,
+                                                         text(line.substr(cursor_col + 1))});
+                                   }
+                               } else {
+                                   line_text = text(lines[i]);
+                               }
+
+                               text_lines.push_back(hbox({line_number, separator(), line_text}));
+                           }
+
+                           return vbox(text_lines);
+                       }),
+                       [this](Event event) { return this->HandleEvent(event); });
+    }
+
+    Element OnRender() override {
+        if (!is_opened_file_) {
+            return vbox({text("Failed to load file"), text(original_filepath) | underlined}) | center;
+        }
+        //SCROLL DOESN'T WORK
+
+        return textSource_->Render() | yframe | vscroll_indicator | frame | reflect(textSourceBox_);
+    }
+
+    bool OnEvent(Event event) override {
+        return textSource_->OnEvent(event);  // Делегируем событие вложенному компоненту
     }
 
     bool Focusable() const final { return true; }
 
-    Element OnRender() override final {
-        if (!is_opened_file_) {
-            return vbox(text("Failed to load file"), text(original_filepath) | underlined) | center;
-        }
-
-        return vbox({textSource_->Render() | vscroll_indicator | yframe | flex | reflect(textSourceBox_)});
-    }
-
-    bool OnEvent(Event event) {
+   private:
+    bool HandleEvent(Event event) {
         if (event == Event::ArrowLeft) {
             textBuffer_.MoveCursorLeft();
             return true;
@@ -217,27 +250,32 @@ class TextWriterImpl : public ComponentBase {
             exitClosure_();
             return true;
         }
-        if(event.is_character()){
+        if (event.is_character()) {
             textBuffer_.InsertChar(event.character()[0]);
             return true;
         }
 
+        // Обработка клика мыши
         if (event.is_mouse() && event.mouse().button == Mouse::Left) {
             if (event.mouse().motion == Mouse::Pressed && textSourceBox_.Contain(event.mouse().x, event.mouse().y)) {
-                textBuffer_.MoveCursorToClosestPosition(event.mouse().x, event.mouse().y);
+                int y = event.mouse().y - textSourceBox_.y_min;
+                int x = event.mouse().x - textSourceBox_.x_min;
+
+                // Учитываем ширину номера строки + разделителя
+                int line_number_width = 4;  // подберёшь под свои числа
+                textBuffer_.MoveCursorToClosestPosition(y, x - line_number_width);
                 return true;
             }
         }
 
-        return ComponentBase::OnEvent(event);
+        return false;
     }
 
-   private:
     std::function<void()> exitClosure_;
     TextBuffer textBuffer_;
     std::string original_filepath;
-    ftxui::Component textSource_;
-    ftxui::Box textSourceBox_;
+    Component textSource_;
+    Box textSourceBox_;
     bool is_opened_file_ = false;
 };
 
