@@ -120,8 +120,8 @@ struct TextBufferImpl {
 };
 class TextEditorImpl : public ComponentBase {
    public:
-    TextEditorImpl(std::string& content)
-        : buffer_(content), height(10), width(10) {
+    TextEditorImpl(std::string& content, bool& changed)
+        : buffer_(content), height(10), width(10), is_changed_(changed) {
         width = 0;
         height = 0;
     }
@@ -244,18 +244,22 @@ class TextEditorImpl : public ComponentBase {
         }
         if (event == Event::Backspace) {
             buffer_.Backspace();
+            is_changed_ = true;
             return true;
         }
         if (event == Event::Delete) {
             buffer_.Delete();
+            is_changed_ = true;
             return true;
         }
         if (event == Event::Return) {
             buffer_.InsertChar('\n');
+            is_changed_ = true;
             return true;
         }
         if (event.is_character()) {
             buffer_.InsertChar(event.character()[0]);
+            is_changed_ = true;
             return true;
         }
 
@@ -293,8 +297,10 @@ class TextEditorImpl : public ComponentBase {
     int height;
     int scroll_x = 0;
     int width;
+
+    bool& is_changed_;
 };
 
-ftxui::Component TextEditor(std::string& content) {
-    return Make<TextEditorImpl>(content);
+ftxui::Component TextEditor(std::string& content, bool& changed) {
+    return Make<TextEditorImpl>(content, changed);
 };
