@@ -67,15 +67,11 @@ struct TextBufferImpl {
 
     void MoveCursorRight() { cursor_offset = std::min(static_cast<int>(content.size()), cursor_offset + 1); }
 
-    void MoveCursorUp() {
-        MoveCursorVertically(-1);
-    }
+    void MoveCursorUp() { MoveCursorVertically(-1); }
 
-    void MoveCursorDown() {
-        MoveCursorVertically(+1);
-    }
+    void MoveCursorDown() { MoveCursorVertically(+1); }
 
-    void MoveCursorVertically(int distance){
+    void MoveCursorVertically(int distance) {
         auto lines = SplitLines();
         auto [line, col] = CursorPosition();
         int new_line = line + distance;
@@ -122,80 +118,53 @@ struct TextBufferImpl {
         }
     }
 };
-
 class TextEditorImpl : public ComponentBase {
    public:
-    TextEditorImpl(std::string& content, int& parent_width, int& parent_height) : buffer_(content), height(parent_height), width(parent_width) {
-        
-    }
+    TextEditorImpl(std::string& content, int& parent_width, int& parent_height)
+        : buffer_(content), height(parent_height), width(parent_width) {width=0; height=0;}
 
     bool Focusable() const final { return true; }
 
-    ftxui::Element OnRender() {
-        auto file_logger = spdlog::get("file_logger");
-        file_logger->info("Editor's sizes: {}, {}", width, height);
+    Element PrepareLineNumbers(int cursor_y) {
         auto lines = buffer_.SplitLines();
-        auto [cusror_y, cusror_x] = buffer_.CursorPosition();
+        Elements line_numbers;
 
-        // Calculate visible lines range based on cursor position (vertical scroll)
-        if (scroll_y > cusror_y) {
-            scroll_y = cusror_y;
-        } else if (cusror_y >= scroll_y + height) {
-            scroll_y = cusror_y - height + 1;
-        }
-
-        // Calculate horizontal scroll based on cursor position
-        if (cusror_x < scroll_x) {
-            scroll_x = cusror_x;
-        } else if (cusror_x >= scroll_x + width) {
-            scroll_x = cusror_x - width + 1;
-        }
-
-        // Ensure scroll positions are within bounds
-        scroll_y = std::max(0, std::min(scroll_y, static_cast<int>(lines.size()) - height));
-        scroll_x = std::max(0, scroll_x);
-
-        // Calculate the last visible line
         int last_visible_line = std::min(scroll_y + height, static_cast<int>(lines.size()));
 
-        // Prepare line numbers column
-        Elements line_numbers;
         for (int i = scroll_y; i < last_visible_line; ++i) {
             auto line_number = text(AlignNumberLeft1(i + 1, 3));
-            if (cusror_y != i) {
+            if (cursor_y != i) {
                 line_number |= dim;
             }
             line_numbers.push_back(line_number);
         }
 
-        // Prepare text lines with horizontal scrolling
+        return vbox(line_numbers);
+    }
+
+    Element PrepareTextLines(int cursor_y, int cursor_x) {
+        auto lines = buffer_.SplitLines();
         Elements text_lines;
+
+        int last_visible_line = std::min(scroll_y + height, static_cast<int>(lines.size()));
+
         for (int i = scroll_y; i < last_visible_line; ++i) {
             std::string visible_text;
             if (scroll_x < static_cast<int>(lines[i].size())) {
-                visible_text = lines[i].substr(
-                    scroll_x,
-                    std::min(width, static_cast<int>(lines[i].size()) - scroll_x)
-                );
+                visible_text = lines[i].substr(scroll_x, std::min(width, static_cast<int>(lines[i].size()) - scroll_x));
             }
 
             Element line_text;
-            if (i == cusror_y) {
-                int visible_cursor_col = cusror_x - scroll_x;
+            if (i == cursor_y) {
+                int visible_cursor_col = cursor_x - scroll_x;
                 if (visible_cursor_col < 0) {
-                    // Cursor is outside visible area, show empty inverted space
                     line_text = text(" ") | inverted;
-                } else if(visible_cursor_col >= static_cast<int>(visible_text.size())){
-                    line_text = hbox({
-                        text(visible_text.substr(0, visible_text.size()-1)),
-                        text(" ") | inverted
-                    });
+                } else if (visible_cursor_col >= static_cast<int>(visible_text.size())) {
+                    line_text = hbox({text(visible_text.substr(0, visible_text.size() - 1)), text(" ") | inverted});
                 } else {
-                    line_text = hbox({
-                        text(visible_text.substr(0, visible_cursor_col)),
-                        text(std::string(1, visible_text[visible_cursor_col])) | inverted,
-                        text(visible_text.substr(visible_cursor_col + 1))
-                    });
+                    line_text = hbox({text(visible_text.substr(0, visible_cursor_col)),
+                                      text(std::string(1, visible_text[visible_cursor_col])) | inverted,
+                                      text(visible_text.substr(visible_cursor_col + 1))});
                 }
             } else {
                 line_text = text(visible_text);
@@ -204,31 +173,51 @@ class TextEditorImpl : public ComponentBase {
             text_lines.push_back(line_text);
         }
 
-        auto line_numbers_column = vbox(line_numbers);
-        auto text_column = vbox(text_lines) | flex;
+        return vbox(text_lines) | flex | reflect(text_box_);
+    }
 
-        auto element = hbox({
-            line_numbers_column,
-            separator(),
-            text_column
-        }) | reflect(textSourceBox_);
+    ftxui::Element OnRender() {
+        auto lines = buffer_.SplitLines();
+        auto [cursor_y, cursor_x] = buffer_.CursorPosition();
 
-        // Update visible area size based on actual box size
-        if (textSourceBox_.y_max >= textSourceBox_.y_min) {
-            height = textSourceBox_.y_max - textSourceBox_.y_min + 1;
+        // Vertical scrolling - only adjust if cursor is outside visible area
+        if (cursor_y < scroll_y) {
+            scroll_y = cursor_y;  // Cursor above visible area
+        } else if (cursor_y >= scroll_y + height) {
+            scroll_y = cursor_y - height + 1;  // Cursor below visible area
         }
-        if (textSourceBox_.x_max >= textSourceBox_.x_min) {
-            // Subtract space for line numbers and separator
-            width = (textSourceBox_.x_max - textSourceBox_.x_min) - 5;
+
+        // Horizontal scrolling - only adjust if cursor is outside visible area
+        if (cursor_x < scroll_x) {
+            scroll_x = cursor_x;  // Cursor left of visible area
+        } else if (cursor_x >= scroll_x + width) {
+            scroll_x = cursor_x - width + 1;  // Cursor right of visible area
+        }
+
+        // Ensure scroll positions are within bounds
+        scroll_y = std::max(0, std::min(scroll_y, static_cast<int>(lines.size()) - height));
+        scroll_x = std::max(0, scroll_x);
+
+        // Подготавливаем отдельно номера строк и текст
+        auto line_numbers_column = PrepareLineNumbers(cursor_y);
+        auto text_column = PrepareTextLines(cursor_y, cursor_x);
+
+        // Собираем итоговый элемент
+        auto element = hbox({line_numbers_column, separator(), text_column});
+
+        // Update visible area size based on actual text box size
+        if (text_box_.y_max >= text_box_.y_min) {
+            height = text_box_.y_max - text_box_.y_min + 1;
+        }
+        if (text_box_.x_max >= text_box_.x_min) {
+            width = text_box_.x_max - text_box_.x_min;
             width = std::max(1, width);
         }
-
-
-
 
         return element;
     }
 
+    // Остальные методы остаются без изменений
     bool OnEvent(Event event) override {
         if (event == Event::ArrowLeft) {
             buffer_.MoveCursorLeft();
@@ -265,21 +254,15 @@ class TextEditorImpl : public ComponentBase {
 
         if (event.is_mouse()) {
             if (event.mouse().button == Mouse::Left && event.mouse().motion == Mouse::Pressed) {
-                if (textSourceBox_.Contain(event.mouse().x, event.mouse().y)) {
-                    int y = event.mouse().y - textSourceBox_.y_min;
-                    int x = event.mouse().x - textSourceBox_.x_min;
+                if (text_box_.Contain(event.mouse().x, event.mouse().y)) {
+                    int y = event.mouse().y - text_box_.y_min;
+                    int x = event.mouse().x - text_box_.x_min;
 
-                    // Adjust for vertical scroll position
+                    // Adjust for scroll position
                     y += scroll_y;
+                    x += scroll_x;
 
-                    // Check if click was in line numbers area
-                    if (x < 4) { // Width of line numbers column
-                        buffer_.MoveCursorToClosestPosition(y, 0);
-                    } else {
-                        // Adjust for horizontal scroll and line numbers width
-                        x = x - 4 + scroll_x;
-                        buffer_.MoveCursorToClosestPosition(y, x);
-                    }
+                    buffer_.MoveCursorToClosestPosition(y, x);
                     return true;
                 }
             }
@@ -298,11 +281,11 @@ class TextEditorImpl : public ComponentBase {
 
    private:
     TextBufferImpl buffer_;
-    ftxui::Box textSourceBox_;
+    ftxui::Box text_box_;
     int scroll_y = 0;
-    int& height;
+    int height;
     int scroll_x = 0;
-    int& width; 
+    int width;
 };
 
 ftxui::Component TextEditor(std::string& content, int& parent_width, int& parent_height) {
