@@ -9,20 +9,21 @@
 #include "ftxui/component/screen_interactive.hpp"
 #include "spdlog/spdlog.h"
 #include "text_editor.hpp"
+#include "FileManip.hpp"
 
 using namespace ftxui;
 
 class TextWriterImpl : public ComponentBase {
    public:
-    TextWriterImpl(temt::AppData& appData, std::function<void()> exitClosure) : exitClosure_(exitClosure) {
-        temt::FileManip::FileInfo dirEntry = appData.selectedEntry();
-        original_filepath = temt::FileManip::assemblePath(dirEntry.parentDirectory, dirEntry.path);
+    TextWriterImpl(std::string_view file_path, std::function<void()> exitClosure)
+        : exitClosure_(exitClosure), original_filepath(file_path.data()) {
+        auto logger = spdlog::get("file_logger");
 
         if (LoadFromFile(original_filepath)) {
-            appData.file_logger_->info("Loaded file: {}", original_filepath);
+            logger->info("Loaded file: {}", original_filepath);
             is_opened_file_ = true;
         } else {
-            appData.file_logger_->error("Failed to load file: {}", original_filepath);
+            logger->error("Failed to load file: {}", original_filepath);
             is_opened_file_ = false;
         }
 
@@ -30,20 +31,22 @@ class TextWriterImpl : public ComponentBase {
         Add(textSource_);
     }
 
-    TextWriterImpl(std::string& content, std::function<void()> exitClosure)
+    TextWriterImpl(std::string& content, std::string_view current_location, std::function<void()> exitClosure)
         : exitClosure_(exitClosure), content_(content) {
         textSource_ = TextEditor(content_, is_file_changed);
         is_opened_file_ = true;
-        original_filepath = "Untitled.txt";  // needs some works with checking available names
+
+        original_filepath = temt::FileManip::assemblePath(current_location, "Untitled.txt");
     }
 
     Element OnRender() override {
         if (!is_opened_file_) {
             return vbox({text("Failed to load file"), text(original_filepath) | underlined}) | center;
         }
-        
+
         return vbox({
-            hbox(text(original_filepath), filler(), (is_file_changed ? text("Unsaved ❌")|underlined : text("Saved ✅"))),
+            hbox(text(original_filepath), filler(),
+                 (is_file_changed ? text("Unsaved ❌") | underlined : text("Saved ✅"))),
             separator(),
             textSource_->Render() | flex,
         });
@@ -60,6 +63,11 @@ class TextWriterImpl : public ComponentBase {
             content_ += line + "\n";
         }
         file.close();
+
+        auto logger = spdlog::get("file_logger");
+        logger->info("TextWriter: file {} is loaded", original_filepath);
+        logger->flush();
+
         return true;
     }
 
@@ -70,9 +78,11 @@ class TextWriterImpl : public ComponentBase {
 
         file << content_;
         file.close();
+
         auto logger = spdlog::get("file_logger");
-        logger->info("Saved file");
+        logger->info("TextWriter: file {} is saved", original_filepath);
         logger->flush();
+
         return true;
     }
 
@@ -82,9 +92,6 @@ class TextWriterImpl : public ComponentBase {
         if (event == Event::CtrlS) {
             SaveToFile(original_filepath);
             is_file_changed = false;
-            auto logger = spdlog::get("file_logger");
-            logger->info("CtrlS pressed");
-            logger->flush();
         }
         if (event == Event::CtrlQ) {
             exitClosure_();
@@ -102,10 +109,10 @@ class TextWriterImpl : public ComponentBase {
     bool is_file_changed = false;
 };
 
-ftxui::Component TextWriter(temt::AppData& appData, std::function<void()> exitClosure) {
-    return Make<TextWriterImpl>(appData, exitClosure);
+ftxui::Component TextWriter(std::string_view file_path, std::function<void()> exitClosure) {
+    return Make<TextWriterImpl>(file_path, exitClosure);
 };
 
-ftxui::Component TextWriter(std::string& content, std::function<void()> exitClosure) {
-    return Make<TextWriterImpl>(content, exitClosure);
+ftxui::Component TextWriter(std::string& content, std::string_view current_location, std::function<void()> exitClosure) {
+    return Make<TextWriterImpl>(content, current_location, exitClosure);
 };
