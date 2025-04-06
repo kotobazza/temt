@@ -1,8 +1,6 @@
 #include "main_app.hpp"
 #include "FileManip.hpp"
 #include "file_browser.hpp"
-#include "hideable.hpp"
-#include "main_panel.hpp"
 #include "options_menu.hpp"
 #include "spdlog/spdlog.h"
 
