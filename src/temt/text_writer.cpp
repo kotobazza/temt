@@ -8,6 +8,7 @@
 #include "ftxui/component/event.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 #include "text_editor.hpp"
+#include "spdlog/spdlog.h"
 
 using namespace ftxui;
 
@@ -44,6 +45,7 @@ class TextWriterImpl : public ComponentBase {
         contentWidth_ = textSourceBox_.x_max - textSourceBox_.x_min;
         contentHeight_ = textSourceBox_.y_max - textSourceBox_.y_min;
         res = textSource_->Render() | reflect(textSourceBox_);
+
 
         return vbox({
             hbox(text(original_filepath), filler(), text("Saved?")),
