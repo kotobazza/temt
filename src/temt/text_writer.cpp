@@ -7,8 +7,8 @@
 #include "app_data.hpp"
 #include "ftxui/component/event.hpp"
 #include "ftxui/component/screen_interactive.hpp"
-#include "text_editor.hpp"
 #include "spdlog/spdlog.h"
+#include "text_editor.hpp"
 
 using namespace ftxui;
 
@@ -26,12 +26,13 @@ class TextWriterImpl : public ComponentBase {
             is_opened_file_ = false;
         }
 
-        textSource_ = TextEditor(content_, contentWidth_, contentHeight_);
+        textSource_ = TextEditor(content_);
+        Add(textSource_);
     }
 
     TextWriterImpl(std::string& content, std::function<void()> exitClosure)
         : exitClosure_(exitClosure), content_(content) {
-        textSource_ = TextEditor(content_, contentWidth_, contentHeight_);
+        textSource_ = TextEditor(content_);
         is_opened_file_ = true;
         original_filepath = "Untitled.txt";  // needs some works with checking available names
     }
@@ -41,16 +42,10 @@ class TextWriterImpl : public ComponentBase {
             return vbox({text("Failed to load file"), text(original_filepath) | underlined}) | center;
         }
 
-        Element res = textSource_->Render() | reflect(textSourceBox_);
-        contentWidth_ = textSourceBox_.x_max - textSourceBox_.x_min;
-        contentHeight_ = textSourceBox_.y_max - textSourceBox_.y_min;
-        res = textSource_->Render() | reflect(textSourceBox_);
-
-
         return vbox({
             hbox(text(original_filepath), filler(), text("Saved?")),
             separator(),
-            textSource_->Render()|flex,
+            textSource_->Render() | flex,
         });
     }
 
@@ -78,20 +73,14 @@ class TextWriterImpl : public ComponentBase {
         return true;
     }
 
-    bool OnEvent(Event event) override { return textSource_->OnEvent(event); }
-
     bool Focusable() const final { return true; }
 
    private:
     std::function<void()> exitClosure_;
     std::string content_;
-    int contentWidth_;
-    int contentHeight_;
     std::string original_filepath;
     Component textSource_;
-    Box textSourceBox_;
     bool is_opened_file_ = false;
-    bool is_first_render = true;
 };
 
 ftxui::Component TextWriter(temt::AppData& appData, std::function<void()> exitClosure) {
