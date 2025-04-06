@@ -6,3 +6,4 @@
 
 
 ftxui::Component TextWriter(temt::AppData& appData, std::function<void()> exitClosure);
+ftxui::Component TextWriter(std::string& content, std::function<void()> exitClosure);
