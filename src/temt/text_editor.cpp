@@ -163,7 +163,7 @@ class TextEditorImpl : public ComponentBase {
                 if (visible_cursor_col < 0) {
                     line_text = text(" ") | inverted;
                 }
-                
+
                 else if (visible_cursor_col >= static_cast<int>(visible_text.size())) {
                     if (visible_text.empty()) {
                         line_text = hbox({text(" ") | inverted, text("")});
@@ -171,7 +171,7 @@ class TextEditorImpl : public ComponentBase {
                         line_text = hbox({text(visible_text), text(" ") | inverted});
                     }
                 }
-                
+
                 else {
                     line_text = hbox({text(visible_text.substr(0, visible_cursor_col)),
                                       text(std::string(1, visible_text[visible_cursor_col])) | inverted,
@@ -187,23 +187,64 @@ class TextEditorImpl : public ComponentBase {
         return vbox(text_lines) | flex | reflect(text_box_);
     }
 
+    Element CreateScrollIndicator(int total_lines, int visible_height, int scroll_pos) {
+        if (total_lines <= visible_height)
+            return text("");
+
+        float thumb_position = (float)scroll_pos / (total_lines - visible_height);
+        return vbox({
+                   filler() | size(HEIGHT, EQUAL, thumb_position * visible_height),
+                   text("▐"),
+                   filler(),
+               }) |
+               size(WIDTH, EQUAL, 1) | frame;
+    }
+
+    // В private-секции класса TextEditorImpl:
+    
+
+    // Вычисляем максимальную ширину строки
+    void UpdateMaxLineWidth() {
+        auto lines = buffer_.SplitLines();
+        max_line_width_ = 0;
+        for (const auto& line : lines) {
+            max_line_width_ = std::max(max_line_width_, static_cast<int>(line.size()));
+        }
+    }
+
+    // Создаём горизонтальный индикатор
+    Element CreateHScrollIndicator(int total_width, int visible_width, int scroll_pos) {
+        if (total_width <= visible_width)
+            return text("");
+
+        float thumb_position = (float)scroll_pos / (total_width - visible_width);
+        float thumb_width = std::max(5.f, (float)visible_width / total_width * visible_width);
+
+        return hbox({
+                   filler() | size(WIDTH, EQUAL, thumb_position * visible_width),
+                   text("▁▁▁") | size(WIDTH, EQUAL, thumb_width),
+                   filler(),
+               }) |
+               size(HEIGHT, EQUAL, 1) | frame;
+    }
+
     ftxui::Element OnRender() {
         auto lines = buffer_.SplitLines();
         auto [cursor_y, cursor_x] = buffer_.CursorPosition();
 
-        
         if (cursor_y < scroll_y) {
-            scroll_y = cursor_y; 
+            scroll_y = cursor_y;
         } else if (cursor_y >= scroll_y + height) {
-            scroll_y = cursor_y - height + 1;  
+            scroll_y = cursor_y - height + 1;
         }
 
-       
         if (cursor_x < scroll_x) {
-            scroll_x = cursor_x;  
+            scroll_x = cursor_x;
         } else if (cursor_x >= scroll_x + width) {
-            scroll_x = cursor_x - width + 1;  
+            scroll_x = cursor_x - width + 1;
         }
+
+        UpdateMaxLineWidth();
 
         scroll_y = std::max(0, std::min(scroll_y, static_cast<int>(lines.size()) - height));
         scroll_x = std::max(0, scroll_x);
@@ -211,7 +252,26 @@ class TextEditorImpl : public ComponentBase {
         auto line_numbers_column = PrepareLineNumbers(cursor_y);
         auto text_column = PrepareTextLines(cursor_y, cursor_x);
 
-        auto element = hbox({line_numbers_column, separator(), text_column});
+        auto vscroll_bar = CreateScrollIndicator(lines.size(), height, scroll_y);
+        auto hscroll_bar = CreateHScrollIndicator(max_line_width_, width, scroll_x);
+
+        
+
+        auto element = vbox({
+            // Основное содержимое + вертикальный скролл
+            hbox({
+                line_numbers_column,
+                separator(),
+                text_column | flex,
+                vscroll_bar
+            }) | flex,
+            
+            // Горизонтальный скролл
+            hbox({
+                filler(),
+                hscroll_bar | size(WIDTH, EQUAL, width) | flex
+            })
+        });
 
         if (text_box_.y_max >= text_box_.y_min) {
             height = text_box_.y_max - text_box_.y_min + 1;
@@ -297,7 +357,7 @@ class TextEditorImpl : public ComponentBase {
     int height;
     int scroll_x = 0;
     int width;
-
+    int max_line_width_ = 0;  
     bool& is_changed_;
 };
 
