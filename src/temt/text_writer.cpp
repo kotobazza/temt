@@ -4,12 +4,12 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include "FileManip.hpp"
 #include "app_data.hpp"
 #include "ftxui/component/event.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 #include "spdlog/spdlog.h"
 #include "text_editor.hpp"
-#include "FileManip.hpp"
 
 using namespace ftxui;
 
@@ -31,12 +31,15 @@ class TextWriterImpl : public ComponentBase {
         Add(textSource_);
     }
 
-    TextWriterImpl(std::string& content, std::string_view current_location, std::function<void()> exitClosure)
-        : exitClosure_(exitClosure), content_(content) {
+    TextWriterImpl(std::string_view content, std::string_view current_dir, std::function<void()> exitClosure)
+        : exitClosure_(exitClosure) {
+        content_ = content.data();
         textSource_ = TextEditor(content_, is_file_changed);
+        Add(textSource_);
         is_opened_file_ = true;
+        is_file_changed = true;
 
-        original_filepath = temt::FileManip::assemblePath(current_location, "Untitled.txt");
+        original_filepath = temt::FileManip::assemblePath(current_dir, "Untitled.txt");
     }
 
     Element OnRender() override {
@@ -46,7 +49,7 @@ class TextWriterImpl : public ComponentBase {
 
         return vbox({
             hbox(text(original_filepath), filler(),
-                 (is_file_changed ? text("Unsaved ❌") | underlined : text("Saved ✅"))),
+                 (is_file_changed ? hbox({text("Unsaved") | underlined, text(" ❌ ")}) : text("Saved ✅ "))),
             separator(),
             textSource_->Render() | flex,
         });
@@ -113,6 +116,8 @@ ftxui::Component TextWriter(std::string_view file_path, std::function<void()> ex
     return Make<TextWriterImpl>(file_path, exitClosure);
 };
 
-ftxui::Component TextWriter(std::string& content, std::string_view current_location, std::function<void()> exitClosure) {
+ftxui::Component TextWriter(std::string_view content,
+                            std::string_view current_location,
+                            std::function<void()> exitClosure) {
     return Make<TextWriterImpl>(content, current_location, exitClosure);
 };
