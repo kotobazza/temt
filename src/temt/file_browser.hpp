@@ -4,5 +4,7 @@
 
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/component_base.hpp"
+#include "FileManip.hpp"
+#include "app_data.hpp"
 
-ftxui::Component FileBrowser(std::string_view path, int& a);
+ftxui::Component FileBrowser(temt::AppData& appData, std::function<void()> openClosure);
