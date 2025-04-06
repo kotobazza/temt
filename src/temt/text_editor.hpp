@@ -4,4 +4,4 @@
 #include "ftxui/component/component_base.hpp"
 
 
-ftxui::Component TextEditor(std::string& content);
+ftxui::Component TextEditor(std::string& content, bool& changed);

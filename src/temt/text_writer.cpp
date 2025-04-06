@@ -26,13 +26,13 @@ class TextWriterImpl : public ComponentBase {
             is_opened_file_ = false;
         }
 
-        textSource_ = TextEditor(content_);
+        textSource_ = TextEditor(content_, is_file_changed);
         Add(textSource_);
     }
 
     TextWriterImpl(std::string& content, std::function<void()> exitClosure)
         : exitClosure_(exitClosure), content_(content) {
-        textSource_ = TextEditor(content_);
+        textSource_ = TextEditor(content_, is_file_changed);
         is_opened_file_ = true;
         original_filepath = "Untitled.txt";  // needs some works with checking available names
     }
@@ -41,9 +41,9 @@ class TextWriterImpl : public ComponentBase {
         if (!is_opened_file_) {
             return vbox({text("Failed to load file"), text(original_filepath) | underlined}) | center;
         }
-
+        
         return vbox({
-            hbox(text(original_filepath), filler(), text("Saved?")),
+            hbox(text(original_filepath), filler(), (is_file_changed ? text("Unsaved ❌")|underlined : text("Saved ✅"))),
             separator(),
             textSource_->Render() | flex,
         });
@@ -70,10 +70,28 @@ class TextWriterImpl : public ComponentBase {
 
         file << content_;
         file.close();
+        auto logger = spdlog::get("file_logger");
+        logger->info("Saved file");
+        logger->flush();
         return true;
     }
 
     bool Focusable() const final { return true; }
+
+    bool OnEvent(Event event) {
+        if (event == Event::CtrlS) {
+            SaveToFile(original_filepath);
+            is_file_changed = false;
+            auto logger = spdlog::get("file_logger");
+            logger->info("CtrlS pressed");
+            logger->flush();
+        }
+        if (event == Event::CtrlQ) {
+            exitClosure_();
+        }
+
+        return ComponentBase::OnEvent(event);
+    }
 
    private:
     std::function<void()> exitClosure_;
@@ -81,6 +99,7 @@ class TextWriterImpl : public ComponentBase {
     std::string original_filepath;
     Component textSource_;
     bool is_opened_file_ = false;
+    bool is_file_changed = false;
 };
 
 ftxui::Component TextWriter(temt::AppData& appData, std::function<void()> exitClosure) {
