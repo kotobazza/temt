@@ -3,6 +3,7 @@
 #include "file_browser.hpp"
 #include "hideable.hpp"
 #include "main_panel.hpp"
+#include "options_menu.hpp"
 #include "spdlog/spdlog.h"
 
 #include "ftxui/component/event.hpp"
@@ -40,7 +41,11 @@ class MainAppImpl : public ComponentBase {
         auto resizableSplit = ResizableSplitLeft(fileBrowser_, rightPanel, &appData_.mainAppSplitLength_);
 
         auto main = Container::Vertical({upperPanel_, resizableSplit | flex}) |
-                    Modal(Container::Vertical({Button("Exit", [this]() { appData_.toggleOptionsMenu(); })}),
+                    Modal(OptionsMenu(appData_,
+                                      [this](Component cmp) {
+                                          mainPanel_->DetachAllChildren();
+                                          mainPanel_->Add(cmp | flex);
+                                      }),
                           &appData_.modalShowOptionsMenu);
 
         Add(main);
@@ -56,13 +61,11 @@ class MainAppImpl : public ComponentBase {
         appData_.file_logger_->info("Selected file: {}",
                                     appData_.usingDirectoryEntries_[appData_.usingDirectorySelectedIndex()].path);
 
-        std::string path = temt::FileManip::assemblePath(appData_.selectedEntry().parentDirectory, appData_.selectedEntry().path);
+        std::string path =
+            temt::FileManip::assemblePath(appData_.selectedEntry().parentDirectory, appData_.selectedEntry().path);
 
-
-        
         mainPanel_->DetachAllChildren();
-        mainPanel_->Add(TextWriter(path, [this]() { ExitFromTextEditor(); })|flex);
-
+        mainPanel_->Add(TextWriter(path, [this]() { ExitFromTextEditor(); }) | flex);
     }
 
     void SetMainPanelChild() {}
