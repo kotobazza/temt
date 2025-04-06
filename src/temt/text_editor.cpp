@@ -252,8 +252,10 @@ class TextEditorImpl : public ComponentBase {
         auto line_numbers_column = PrepareLineNumbers(cursor_y);
         auto text_column = PrepareTextLines(cursor_y, cursor_x);
 
-        auto vscroll_bar = CreateScrollIndicator(lines.size(), height, scroll_y);
-        auto hscroll_bar = CreateHScrollIndicator(max_line_width_, width, scroll_x);
+
+
+        auto vscroll_bar = (static_cast<int>(lines.size()) > height ? CreateScrollIndicator(lines.size(), height, scroll_y) : emptyElement());
+        auto hscroll_bar = (max_line_width_ > width ? CreateHScrollIndicator(max_line_width_, width, scroll_x) : emptyElement());
 
         
 
