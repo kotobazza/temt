@@ -55,8 +55,13 @@ class MainAppImpl : public ComponentBase {
     void OpenSelectedFile() {
         appData_.file_logger_->info("Selected file: {}",
                                     appData_.usingDirectoryEntries_[appData_.usingDirectorySelectedIndex()].path);
+
+        std::string path = temt::FileManip::assemblePath(appData_.selectedEntry().parentDirectory, appData_.selectedEntry().path);
+
+
+        
         mainPanel_->DetachAllChildren();
-        mainPanel_->Add(TextWriter(appData_, [this]() { ExitFromTextEditor(); })|flex);
+        mainPanel_->Add(TextWriter(path, [this]() { ExitFromTextEditor(); })|flex);
 
     }
 
