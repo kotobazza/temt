@@ -120,8 +120,11 @@ struct TextBufferImpl {
 };
 class TextEditorImpl : public ComponentBase {
    public:
-    TextEditorImpl(std::string& content, int& parent_width, int& parent_height)
-        : buffer_(content), height(parent_height), width(parent_width) {width=0; height=0;}
+    TextEditorImpl(std::string& content)
+        : buffer_(content), height(10), width(10) {
+        width = 0;
+        height = 0;
+    }
 
     bool Focusable() const final { return true; }
 
@@ -141,7 +144,6 @@ class TextEditorImpl : public ComponentBase {
 
         return vbox(line_numbers);
     }
-
     Element PrepareTextLines(int cursor_y, int cursor_x) {
         auto lines = buffer_.SplitLines();
         Elements text_lines;
@@ -157,17 +159,26 @@ class TextEditorImpl : public ComponentBase {
             Element line_text;
             if (i == cursor_y) {
                 int visible_cursor_col = cursor_x - scroll_x;
+
                 if (visible_cursor_col < 0) {
                     line_text = text(" ") | inverted;
-                } else if (visible_cursor_col >= static_cast<int>(visible_text.size())) {
-                    line_text = hbox({text(visible_text.substr(0, visible_text.size() - 1)), text(" ") | inverted});
-                } else {
+                }
+                
+                else if (visible_cursor_col >= static_cast<int>(visible_text.size())) {
+                    if (visible_text.empty()) {
+                        line_text = hbox({text(" ") | inverted, text("")});
+                    } else {
+                        line_text = hbox({text(visible_text), text(" ") | inverted});
+                    }
+                }
+                
+                else {
                     line_text = hbox({text(visible_text.substr(0, visible_cursor_col)),
                                       text(std::string(1, visible_text[visible_cursor_col])) | inverted,
                                       text(visible_text.substr(visible_cursor_col + 1))});
                 }
             } else {
-                line_text = text(visible_text);
+                line_text = text(visible_text.empty() ? " " : visible_text);
             }
 
             text_lines.push_back(line_text);
@@ -180,32 +191,28 @@ class TextEditorImpl : public ComponentBase {
         auto lines = buffer_.SplitLines();
         auto [cursor_y, cursor_x] = buffer_.CursorPosition();
 
-        // Vertical scrolling - only adjust if cursor is outside visible area
+        
         if (cursor_y < scroll_y) {
-            scroll_y = cursor_y;  // Cursor above visible area
+            scroll_y = cursor_y; 
         } else if (cursor_y >= scroll_y + height) {
-            scroll_y = cursor_y - height + 1;  // Cursor below visible area
+            scroll_y = cursor_y - height + 1;  
         }
 
-        // Horizontal scrolling - only adjust if cursor is outside visible area
+       
         if (cursor_x < scroll_x) {
-            scroll_x = cursor_x;  // Cursor left of visible area
+            scroll_x = cursor_x;  
         } else if (cursor_x >= scroll_x + width) {
-            scroll_x = cursor_x - width + 1;  // Cursor right of visible area
+            scroll_x = cursor_x - width + 1;  
         }
 
-        // Ensure scroll positions are within bounds
         scroll_y = std::max(0, std::min(scroll_y, static_cast<int>(lines.size()) - height));
         scroll_x = std::max(0, scroll_x);
 
-        // Подготавливаем отдельно номера строк и текст
         auto line_numbers_column = PrepareLineNumbers(cursor_y);
         auto text_column = PrepareTextLines(cursor_y, cursor_x);
 
-        // Собираем итоговый элемент
         auto element = hbox({line_numbers_column, separator(), text_column});
 
-        // Update visible area size based on actual text box size
         if (text_box_.y_max >= text_box_.y_min) {
             height = text_box_.y_max - text_box_.y_min + 1;
         }
@@ -288,6 +295,6 @@ class TextEditorImpl : public ComponentBase {
     int width;
 };
 
-ftxui::Component TextEditor(std::string& content, int& parent_width, int& parent_height) {
-    return Make<TextEditorImpl>(content, parent_width, parent_height);
+ftxui::Component TextEditor(std::string& content) {
+    return Make<TextEditorImpl>(content);
 };
