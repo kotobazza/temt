@@ -1,19 +1,35 @@
 #include "options_menu.hpp"
-
+#include "text_writer.hpp"
+#include <string_view>
+#include "ftxui/dom/elements.hpp"
 
 using namespace ftxui;
 
 class OptionsMenuImpl : public ComponentBase {
-    OptionsMenuImpl(temt::AppData& appData, std::function<void()> optionSelectedClosure) : appData_(appData), optionSelectedClosure_(optionSelectedClosure) {
-        
-    }
+   public:
+    OptionsMenuImpl(temt::AppData& appData, std::function<void(ftxui::Component)> optionSelectedClosure)
+        : appData_(appData), optionSelectedClosure_(optionSelectedClosure) {
+            Add(Container::Vertical({
+                Container::Horizontal({
+                    Button("Open\nText Writer", [this](){
+                        appData_.toggleOptionsMenu();
+                        optionSelectedClosure_(TextWriter("", appData_.current_path_, [](){}));
+                    }),
+                    Renderer([](){
+                        return paragraph("Opens a Text Writer applet that lets read and write text into character files")|vcenter;
+                    })
+                }),
+                Container::Horizontal({
+                    Button("Exit", [this](){appData_.toggleOptionsMenu();})
+                })
+            })|border);
+        }
 
+   private:
     temt::AppData& appData_;
-    std::function<void()> optionSelectedClosure_;  //optionSelectedClosure should return using component in mainPanel_. Now i need to implement an using component to create full ui
+    std::function<void(Component)> optionSelectedClosure_;
 };
 
-
-
-ftxui::Component OptionsMenu(temt::AppData& appData, std::function<void()> optionSelectedClosure){
+ftxui::Component OptionsMenu(temt::AppData& appData, std::function<void(ftxui::Component)> optionSelectedClosure) {
     return Make<OptionsMenuImpl>(appData, optionSelectedClosure);
 }
