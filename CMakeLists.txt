@@ -182,6 +182,17 @@ set(CPACK_PACKAGE_LICENSE "MIT")
 set(CPACK_RPM_PACKAGE_GROUP "Development/Tools")
 set(CPACK_GENERATOR "RPM;DEB") 
 
+# -------- Final Packaging Setup
+if(WIN32)
+    set(CPACK_GENERATOR "NSIS")
+elseif(UNIX AND EXISTS "/etc/fedora-release")
+    set(CPACK_GENERATOR "RPM")
+elseif(UNIX AND EXISTS "/etc/lsb-release")
+    set(CPACK_GENERATOR "DEB")
+endif()
+
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+
 include(CPack)
 
 
