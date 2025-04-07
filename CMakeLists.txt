@@ -90,11 +90,11 @@ FetchContent_MakeAvailable(spdlog)
 
 
 # -------- Executables
-add_executable(main src/main.cpp)
+add_executable(temt src/main.cpp)
 add_executable(tests tests/tests.cpp)
 
-target_compile_features(main PRIVATE cxx_std_20)
-set_target_properties(main PROPERTIES
+target_compile_features(temt PRIVATE cxx_std_20)
+set_target_properties(temt PROPERTIES
     CXX_EXTENSIONS OFF
 )
 
@@ -105,7 +105,7 @@ set_target_properties(tests PROPERTIES
 
 
 target_link_libraries(
-    main 
+    temt 
     PRIVATE ftxui::screen
     PRIVATE ftxui::dom
     PRIVATE ftxui::component 
@@ -113,7 +113,7 @@ target_link_libraries(
     PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>
 )
 
-target_include_directories(main PRIVATE ${cereal_SOURCE_DIR}/include)
+target_include_directories(temt PRIVATE ${cereal_SOURCE_DIR}/include)
 
 target_link_libraries(
     tests
@@ -129,15 +129,15 @@ target_include_directories(tests PRIVATE ${cereal_SOURCE_DIR}/include)
 
 file(GLOB headers "src/temt/*.hpp")
 foreach(file ${headers})
-  target_sources(main PUBLIC ${file})
+  target_sources(temt PUBLIC ${file})
 endforeach()
 
 file(GLOB sources "src/temt/*.cpp")
 foreach(file ${sources})
-  target_sources(main PRIVATE ${file})
+  target_sources(temt PRIVATE ${file})
 endforeach()
 
-target_include_directories(main
+target_include_directories(temt
 PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/src/temt
 )
@@ -159,17 +159,17 @@ PRIVATE
 )
 
 if (MSVC)
-    target_compile_options(main PRIVATE /O2 /W4)
+    target_compile_options(temt PRIVATE /O2 /W4)
     target_compile_options(tests PRIVATE /O2 /W4)
 else ()
-    target_compile_options(main PRIVATE -O3 -Wall -Wextra -pedantic -Werror)
+    target_compile_options(temt PRIVATE -O3 -Wall -Wextra -pedantic -Werror)
     target_compile_options(tests PRIVATE -O3 -Wall -Wextra -pedantic -Werror)
 endif()
 
 
 
 # -------- Installation properties
-install(TARGETS main RUNTIME DESTINATION bin)
+install(TARGETS temt RUNTIME DESTINATION bin)
 
 
 
