@@ -3,9 +3,10 @@ cmake_minimum_required(VERSION 3.20)
 
 
 # -------- Project definition
+SET(MAJOR_VERSION "1" CACHE INTERNAL "Major version")
 set(MINOR_VERSION "0" CACHE INTERNAL "Minor version")
-set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
-set(PROJECT_VERSION 0.${MINOR_VERSION}.${PATCH_VERSION})
+set(PATCH_VERSION "0" CACHE INTERNAL "Patch version")
+set(PROJECT_VERSION ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION})
 
 set(PROJECT_DESCRIPTION "A Terminal Multitool")
 set(PROJECT_COPYRIGHT "Copyright (c) 2025 kotobazza")
