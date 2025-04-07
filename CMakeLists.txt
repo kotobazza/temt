@@ -38,13 +38,14 @@ endif()
 
 
 # --- libarchive
-set(BUILD_TESTING OFF CACHE BOOL "Disable testing for libarchive")
+set(ENABLE_TEST OFF CACHE BOOL "Disable tests from external projects" FORCE)
 
 FetchContent_Declare(
     libarchive
     GIT_REPOSITORY https://github.com/libarchive/libarchive.git
     GIT_TAG master
     GIT_SHALLOW
+    CMAKE_ARGS -DENABLE_TESTING=OFF
     EXCLUDE_FROM_ALL
 )
 
@@ -191,9 +192,3 @@ add_test(tests tests)
 
 include(GoogleTest)
 gtest_discover_tests(tests)
-
-add_custom_target(run_tests
-  COMMAND ctest --test-dir ${CMAKE_BINARY_DIR} -R tests
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  COMMENT "Running tests with ctest -R tests"
-)
