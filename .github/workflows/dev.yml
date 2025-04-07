@@ -8,7 +8,9 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: fedora-latest
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
 
     steps:
     - uses: actions/checkout@v3
@@ -22,7 +24,7 @@ jobs:
       run: cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=g++
 
     - name: Build
-      run: cmake --build build
+      run: cmake --build build --target tests
 
     - name: Run Tests
       run: ctest --test-dir build --output-on-failure
