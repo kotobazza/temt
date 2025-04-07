@@ -14,11 +14,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: sudo dnf update && sudo dnf install -y ninja-build g++ unzip
+
     - name: Set up CMake
       uses: lukka/get-cmake@latest
 
-    - name: Install dependencies
-      run: sudo dnf update && sudo dnf install -y ninja-build g++
+
 
     - name: Configure
       run: cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=g++
