@@ -1,0 +1,33 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: sudo dnf update -y && sudo dnf install -y ninja-build g++ unzip git
+
+    - name: Set up CMake
+      uses: lukka/get-cmake@latest
+
+
+
+    - name: Configure
+      run: cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=g++
+
+    - name: Build
+      run: cmake --build build --target tests
+
+    - name: Run Tests
+      run: ctest --test-dir build --output-on-failure
