@@ -46,12 +46,6 @@ class MainAppImpl : public ComponentBase {
                           &appData_.modalShowOptionsMenu);
 
         Add(main);
-
-        // Add(Container::Vertical(
-        //         {upperPanel_,
-        //          Container::Horizontal({fileBrowser_, Container::Vertical({mainPanel_, logPanel_}) | flex_grow}) |
-        //              flex}) |
-        //     flex);
     }
 
     void OpenSelectedFile() {
