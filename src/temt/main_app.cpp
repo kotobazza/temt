@@ -24,8 +24,7 @@ class MainAppImpl : public ComponentBase {
 
         upperPanel_ = Container::Horizontal(
             {Button(" < ", [&]() { appData_.toggleFileBrowser(); }),
-             Button("Menu", [this]() { appData_.toggleOptionsMenu(); }), Button("Help", []() {}),
-             Button("Stats", [this]() { OpenSelectedFile(); }),
+             Button("Menu", [this]() { appData_.toggleOptionsMenu(); }),
              Renderer([&]() { return hbox({text(" #>") | color(ftxui::Color::Yellow1), text(appData_.exec_path_)}); }) |
                  vcenter | bold,
              Renderer([]() { return filler(); }), Button(" ✖ ", [this]() { exitClosure_(); })});
