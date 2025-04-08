@@ -77,7 +77,7 @@ jobs:
       - name: Install dependencies (Fedora)
         if: matrix.os == 'fedora'
         run: |
-          dnf install -y cmake gcc-c++ ninja-build rpm-build
+          dnf install -y cmake gcc-c++ ninja-build rpm-build unzip git 
 
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows'
