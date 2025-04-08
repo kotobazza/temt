@@ -63,6 +63,11 @@ FetchContent_MakeAvailable(libarchive)
 
 # FetchContent_MakeAvailable(cereal)
 
+set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+set(BUILD_GTEST ON CACHE BOOL "" FORCE)
+set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  
+set(BUILD_SHARED_LIBS OFF)  
 
 # --- GTest
 FetchContent_Declare(
