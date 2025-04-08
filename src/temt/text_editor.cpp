@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <numeric>
 
 #include "ftxui/component/event.hpp"
 #include "ftxui/component/screen_interactive.hpp"
@@ -21,7 +22,7 @@ struct TextBufferImpl {
     std::string& content;
     int cursor_offset = 0;
 
-    TextBufferImpl(std::string& content_) : content(content_) {}
+    explicit TextBufferImpl(std::string& content_) : content(content_) {}
 
     std::vector<std::string> SplitLines() const {
         std::vector<std::string> lines;
@@ -206,10 +207,14 @@ class TextEditorImpl : public ComponentBase {
     // Вычисляем максимальную ширину строки
     void UpdateMaxLineWidth() {
         auto lines = buffer_.SplitLines();
-        max_line_width_ = 0;
-        for (const auto& line : lines) {
-            max_line_width_ = std::max(max_line_width_, static_cast<int>(line.size()));
-        }
+        max_line_width_ = std::accumulate(
+            lines.begin(), 
+            lines.end(), 
+            max_line_width_,
+            [](int current_max, const auto& line) {
+                return std::max(current_max, static_cast<int>(line.size()));
+            }
+        );
     }
 
     // Создаём горизонтальный индикатор

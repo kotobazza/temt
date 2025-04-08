@@ -23,7 +23,7 @@ class FileBrowserImpl : public ComponentBase {
 
         menu_ = Menu(&entriesNames_, &appData_.usingDirectorySelectedIndex());
 
-        returnBtn_ = BorderlessButton("  ⬅  ../", [this]() { ОpenParentDirectory(); }) | bold;
+        returnBtn_ = BorderlessButton("  ⬅  ../", [this]() {OpenParentDirectory(); }) | bold;
 
         Add(Container::Vertical({returnBtn_, menu_}));
     }
@@ -109,7 +109,7 @@ class FileBrowserImpl : public ComponentBase {
         }
     }
 
-    void ОpenParentDirectory() { appData_.NavigateToPath(temt::FileManip::getParentPath(appData_.current_path_)); }
+    void OpenParentDirectory() { appData_.NavigateToPath(temt::FileManip::getParentPath(appData_.current_path_)); }
 
     void OpenDirectory(const std::string_view path) { appData_.NavigateToPath(path); }
 };

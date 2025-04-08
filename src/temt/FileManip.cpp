@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stack>
 #include <string>
+#include <algorithm>
 
 namespace temt {
 
@@ -50,19 +51,23 @@ bool isDirectory(std::string_view path) {
     return std::filesystem::is_directory(clearNonRelativePath(path));
 }
 
-//ActionState deletePath(std::string_view path) { return ActionState::Unavailable;}
+// ActionState deletePath(std::string_view path) { return ActionState::Unavailable;}
 
 bool isEmpty(std::string_view path) {
     return std::filesystem::is_empty(clearNonRelativePath(path));
 }
 
 std::vector<FileInfo> readDirectoryFlatEntries(std::string_view path) {
-    std::vector<FileInfo> contents;
+    std::vector<std::filesystem::directory_entry> entries{std::filesystem::directory_iterator(std::string(path)),
+                                                          std::filesystem::directory_iterator{}};
 
-    for (const auto& entry : std::filesystem::directory_iterator(std::string(path))) {
-        contents.push_back(FileInfo{entry.path().filename().string(), getParentPath(entry.path().string()),
-                            identifyFileType(entry.path().string())});
-    }
+    std::vector<FileInfo> contents;
+    contents.reserve(entries.size());
+
+    std::transform(entries.begin(), entries.end(), std::back_inserter(contents), [](const auto& entry) {
+        return FileInfo{entry.path().filename().string(), getParentPath(entry.path().string()),
+                        identifyFileType(entry.path().string())};
+    });
 
     return contents;
 }
@@ -81,7 +86,7 @@ std::vector<FileInfo> readDirectoryRecursiveEntries(std::string_view path) {
                 dirStack.push(entry);
             } else {
                 entries.push_back(FileInfo{entry.path().filename().string(), getParentPath(entry.path().string()),
-                                   identifyFileType(entry.path().string())});
+                                           identifyFileType(entry.path().string())});
             }
         }
     }
@@ -125,7 +130,7 @@ FileType identifyFileType(std::string_view path) {
     return type;
 }
 
-std::string assemblePath(std::string_view parent, std::string_view child){
+std::string assemblePath(std::string_view parent, std::string_view child) {
     return (std::filesystem::path(parent.data()) / child.data()).string();
 }
 
