@@ -40,7 +40,6 @@ jobs:
         --suppress=missingIncludeSystem \
         --suppress=missingInclude \
         --std=c++20 \
-        ${CPPCHECK_INCLUDES} \
         --error-exitcode=1 \
         src/
 
