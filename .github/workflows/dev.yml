@@ -38,8 +38,7 @@ jobs:
         ${CPPCHECK_INCLUDES} \
         --inline-suppr \
         --error-exitcode=1 \
-        --platform=unix64 \
-        --project=build/compile_commands.json  
+        --platform=unix64 \ 
 
     - name: Check clang-format
       run: |
