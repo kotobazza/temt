@@ -48,29 +48,39 @@ jobs:
     needs: release
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, fedora-latest]
+        os: [ubuntu, windows, fedora]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu
+            runs_on: ubuntu-latest
             cpack_ext: ".deb"
-          - os: fedora-latest
-            cpack_ext: ".rpm"
-          - os: windows-latest
+          - os: windows
+            runs_on: windows-latest
             cpack_ext: ".exe"
-    runs-on: ${{ matrix.os }}
+          - os: fedora
+            runs_on: ubuntu-latest
+            cpack_ext: ".rpm"
+            container: fedora:latest
+    runs-on: ${{ matrix.runs_on }}
+    container:
+      image: ${{ matrix.container }}
+      options: --privileged  
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Install dependencies (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt update && sudo apt install -y cmake g++ ninja-build rpm dpkg
+        if: matrix.os == 'ubuntu'
+        run: |
+          sudo apt update
+          sudo apt install -y cmake g++ ninja-build rpm dpkg
 
       - name: Install dependencies (Fedora)
-        if: matrix.os == 'fedora-latest'
-        run: sudo dnf install -y cmake gcc-c++ ninja-build rpm-build
+        if: matrix.os == 'fedora'
+        run: |
+          dnf install -y cmake gcc-c++ ninja-build rpm-build
 
       - name: Install dependencies (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows'
         uses: aminya/setup-cpp@v1
         with:
           compiler: cl
@@ -92,3 +102,4 @@ jobs:
           upload_url: ${{ needs.release.outputs.upload_url }}
           asset_path: build/*.${{ matrix.cpack_ext }}
           overwrite: true
+
