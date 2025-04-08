@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: sudo apt update && sudo apt install -y cmake g++ ninja-build
+        run: sudo apt update && sudo apt install -y cmake g++ ninja-build unzip
 
       - name: Configure project
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
