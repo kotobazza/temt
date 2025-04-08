@@ -33,18 +33,14 @@ jobs:
         echo "=== CPPCHECK INCLUDES ==="
         echo "${CPPCHECK_INCLUDES}" | tr ' ' '\n'
         echo "========================"
-        
+    
         
         cppcheck \
         --enable=all \
-        --suppress=missingIncludeSystem \
-        --suppress=missingInclude \
         --std=c++20 \
         ${CPPCHECK_INCLUDES} \
-
-    - name: Check clang-format
-      run: |
-        find src include -name '*.hpp' -o -name '*.cpp' | xargs clang-format --dry-run --Werror
+        --error-exitcode=1 \
+        --project=build/compile_commands.json 2>&1
 
     - name: Run Lizard
       run: |
