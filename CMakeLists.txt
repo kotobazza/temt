@@ -199,18 +199,40 @@ if(ENABLE_CLANG_TIDY)
     endif()
 endif()
 
+
+
+
 if(ENABLE_CPPCHECK)
     get_target_property(TEMT_INCLUDES temt INCLUDE_DIRECTORIES)
-    list(REMOVE_DUPLICATES TEMT_INCLUDES)
 
+    list(APPEND TEMT_INCLUDES
+        ${ftxui_SOURCE_DIR}/include
+        ${spdlog_SOURCE_DIR}/include
+        ${libarchive_SOURCE_DIR}/include
+    )
+    
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        execute_process(
+            COMMAND ${CMAKE_CXX_COMPILER} -print-search-dirs
+            OUTPUT_VARIABLE GCC_SEARCH_DIRS
+        )
+        string(REGEX MATCHALL "libraries: =([^\n]+)" GCC_LIB_DIRS ${GCC_SEARCH_DIRS})
+        list(APPEND TEMT_INCLUDES ${CMAKE_MATCH_1}/include)
+    endif()
+    
     set(CPPCHECK_INCLUDES "")
     foreach(INC ${TEMT_INCLUDES})
-        set(CPPCHECK_INCLUDES "${CPPCHECK_INCLUDES} -I${INC}")
+        if(INC AND NOT INC MATCHES "\\$<.*>") 
+            get_filename_component(ABS_INC "${INC}" ABSOLUTE)
+            if(EXISTS "${ABS_INC}")
+                set(CPPCHECK_INCLUDES "${CPPCHECK_INCLUDES} -I${ABS_INC}")
+            endif()
+        endif()
     endforeach()
-
+    
     file(WRITE "${CMAKE_BINARY_DIR}/cppcheck_includes.txt" "${CPPCHECK_INCLUDES}")
+    message(STATUS "CPPCheck include paths: ${CPPCHECK_INCLUDES}")  # Для отладки
 endif()
-
 
 # -------- Installation properties
 install(TARGETS temt RUNTIME DESTINATION bin)
