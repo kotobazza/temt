@@ -1,8 +1,6 @@
 #include "text_writer.hpp"
 
 #include <fstream>
-#include <iomanip>
-#include <iostream>
 #include <sstream>
 #include "FileManip.hpp"
 #include "app_data.hpp"
