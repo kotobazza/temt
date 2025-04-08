@@ -126,7 +126,7 @@ FileType identifyFileType(std::string_view path) {
 }
 
 std::string assemblePath(std::string_view parent, std::string_view child){
-    return std::string((std::filesystem::path(parent.data()) / child.data()).c_str());
+    return (std::filesystem::path(parent.data()) / child.data()).string();
 }
 
 }  // namespace FileManip
