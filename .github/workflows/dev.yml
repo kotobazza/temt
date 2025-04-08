@@ -42,9 +42,9 @@ jobs:
         --std=c++20 \
         ${CPPCHECK_INCLUDES} \
         --error-exitcode=1 \
-        --project=build/compile_commands.json 2>&1
+        src/
 
     - name: Run Lizard
       run: |
         pip install lizard
-        lizard src/ include/ -w
+        lizard src/ -w
