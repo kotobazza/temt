@@ -5,7 +5,7 @@ using namespace ftxui;
 
 class BorderlessButtonImpl : public ComponentBase {
    public:
-    BorderlessButtonImpl(std::string label, std::function<void()> on_click) : label_(label), on_click_(on_click), hovered_(false), active_(false) {}
+    BorderlessButtonImpl(std::string label, std::function<void()> on_click) : hovered_(false), active_(false), label_(label), on_click_(on_click) {}
 
     Element OnRender() override {
         bool is_hovered = hovered_ || active_;
