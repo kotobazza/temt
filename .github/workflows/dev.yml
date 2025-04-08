@@ -26,9 +26,16 @@ jobs:
     - name: Configure
       run: cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=g++
 
-    - name: CppCheck Analysis
+    - name: Run CppCheck
       run: |
-        cppcheck --enable=all --inconclusive --std=c++20 --suppress=missingIncludeSystem -I include/ src/
+        CPPCHECK_INCLUDES=$(cat build/cppcheck_includes.txt)
+        
+        cppcheck \
+          --enable=all \
+          --suppress=missingIncludeSystem \
+          --std=c++20 \
+          ${CPPCHECK_INCLUDES} \
+          src/ tests/
 
     - name: Check clang-format
       run: |
