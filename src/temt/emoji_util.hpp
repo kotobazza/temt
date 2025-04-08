@@ -4,7 +4,7 @@
 
 namespace temt {
 namespace emoji {
-std::string emojiedFileName(FileManip::FileInfo& file) {
+std::string emojiedFileName(const FileManip::FileInfo& file) {
     switch (file.type) {
         case FileManip::FileType::Directory:
             return "📁 " + file.path;
