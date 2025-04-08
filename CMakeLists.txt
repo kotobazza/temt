@@ -94,6 +94,9 @@ FetchContent_MakeAvailable(spdlog)
 
 
 
+
+
+
 # -------- Executables
 add_executable(temt src/main.cpp)
 add_executable(tests tests/tests.cpp)
@@ -163,6 +166,7 @@ PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/src/temt
 )
 
+
 if (MSVC)
     target_compile_options(temt PRIVATE /O2 /W4)
     target_compile_options(tests PRIVATE /O2 /W4)
@@ -170,6 +174,33 @@ else ()
     target_compile_options(temt PRIVATE -O3 -Wall -Wextra -pedantic -Werror)
     target_compile_options(tests PRIVATE -O3 -Wall -Wextra -pedantic -Werror)
 endif()
+
+
+
+option(ENABLE_CLANG_TIDY "Enable clang-tidy analysis" ON)
+if(ENABLE_CLANG_TIDY)
+    find_program(CLANG_TIDY_EXE NAMES "clang-tidy" "clang-tidy-14" "clang-tidy-15" "clang-tidy-16")
+    if(CLANG_TIDY_EXE)
+        # Настройки для игнорирования сторонних библиотек
+        set(CLANG_TIDY_CHECKS
+            "-checks=*,-modernize-use-trailing-return-type,"
+            "-header-filter='${CMAKE_CURRENT_SOURCE_DIR}/src/temt/*|${CMAKE_CURRENT_SOURCE_DIR}/include/*'"
+        )
+        
+        # Игнорируем third-party код
+        set(CLANG_TIDY_ARGS
+            "${CLANG_TIDY_CHECKS}"
+            "--extra-arg=-Wno-unknown-warning-option"
+            "--quiet"
+        )
+        
+        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};${CLANG_TIDY_ARGS}")
+        message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+    else()
+        message(WARNING "clang-tidy requested but executable not found")
+    endif()
+endif()
+
 
 
 
