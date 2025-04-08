@@ -31,11 +31,15 @@ jobs:
         CPPCHECK_INCLUDES=$(cat build/cppcheck_includes.txt)
         
         cppcheck \
-          --enable=all \
-          --suppress=missingIncludeSystem \
-          --std=c++20 \
-          ${CPPCHECK_INCLUDES} \
-          src/ tests/
+        --enable=all \
+        --suppress=missingIncludeSystem \
+        --suppress=missingInclude \
+        --std=c++20 \
+        ${CPPCHECK_INCLUDES} \
+        --inline-suppr \
+        --error-exitcode=1 \
+        --platform=unix64 \
+        --project=build/compile_commands.json  
 
     - name: Check clang-format
       run: |
