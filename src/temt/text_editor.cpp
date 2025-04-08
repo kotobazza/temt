@@ -201,10 +201,6 @@ class TextEditorImpl : public ComponentBase {
                size(WIDTH, EQUAL, 1) | frame;
     }
 
-    // В private-секции класса TextEditorImpl:
-    
-
-    // Вычисляем максимальную ширину строки
     void UpdateMaxLineWidth() {
         auto lines = buffer_.SplitLines();
         max_line_width_ = std::accumulate(
@@ -265,7 +261,6 @@ class TextEditorImpl : public ComponentBase {
         
 
         auto element = vbox({
-            // Основное содержимое + вертикальный скролл
             hbox({
                 line_numbers_column,
                 separator(),
@@ -273,7 +268,6 @@ class TextEditorImpl : public ComponentBase {
                 vscroll_bar
             }) | flex,
             
-            // Горизонтальный скролл
             hbox({
                 filler(),
                 hscroll_bar | size(WIDTH, EQUAL, width) | flex
@@ -291,7 +285,6 @@ class TextEditorImpl : public ComponentBase {
         return element;
     }
 
-    // Остальные методы остаются без изменений
     bool OnEvent(Event event) override {
         if (event == Event::ArrowLeft) {
             buffer_.MoveCursorLeft();
@@ -336,7 +329,6 @@ class TextEditorImpl : public ComponentBase {
                     int y = event.mouse().y - text_box_.y_min;
                     int x = event.mouse().x - text_box_.x_min;
 
-                    // Adjust for scroll position
                     y += scroll_y;
                     x += scroll_x;
 
