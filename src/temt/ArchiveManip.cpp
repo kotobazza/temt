@@ -9,6 +9,11 @@
 
 #include "ArchiveManip.hpp"
 
+#ifdef _WIN32
+#include <cstddef>
+typedef std::ptrdiff_t ssize_t;
+#endif
+
 
 namespace temt {
 namespace ArchiveManip {
