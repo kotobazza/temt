@@ -1,5 +1,6 @@
 #include <chrono>
 #include <vector>
+#include <algorithm>
 
 #include "ftxui/component/event.hpp"
 #include "ftxui/component/screen_interactive.hpp"
@@ -30,9 +31,15 @@ class FileBrowserImpl : public ComponentBase {
 
     Element OnRender() override final {
         entriesNames_.clear();
-        for (auto entry : appData_.usingDirectoryEntries_) {
-            entriesNames_.push_back(temt::emoji::emojiedFileName(entry));
-        }
+
+        std::transform(
+            appData_.usingDirectoryEntries_.begin(), 
+            appData_.usingDirectoryEntries_.end(),
+            std::back_inserter(entriesNames_),
+            [](const auto& entry) {
+                return temt::emoji::emojiedFileName(entry);
+            }
+        );
 
         return vbox({hbox({text("/> ") | color(ftxui::Color::Cyan), text(appData_.current_path_) | underlined}) |
                          borderEmpty | bold,
