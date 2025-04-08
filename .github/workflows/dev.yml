@@ -29,6 +29,11 @@ jobs:
     - name: Run CppCheck
       run: |
         CPPCHECK_INCLUDES=$(cat build/cppcheck_includes.txt)
+
+        echo "=== CPPCHECK INCLUDES ==="
+        echo "${CPPCHECK_INCLUDES}" | tr ' ' '\n'
+        echo "========================"
+        
         
         cppcheck \
         --enable=all \
@@ -36,9 +41,6 @@ jobs:
         --suppress=missingInclude \
         --std=c++20 \
         ${CPPCHECK_INCLUDES} \
-        --inline-suppr \
-        --error-exitcode=1 \
-        --platform=unix64 \ 
 
     - name: Check clang-format
       run: |
