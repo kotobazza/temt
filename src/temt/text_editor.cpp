@@ -45,7 +45,7 @@ struct TextBufferImpl {
                 line = i;
                 break;
             }
-            col -= lines[i].size() + 1;
+            col -= static_cast<int>(lines[i].size()) + 1;
         }
         return {static_cast<int>(line), col};
     }
@@ -58,7 +58,7 @@ struct TextBufferImpl {
 
         cursor_offset = 0;
         for (int i = 0; i < x; ++i) {
-            cursor_offset += lines[i].size() + 1;
+            cursor_offset += static_cast<int>(lines[i].size()) + 1;
         }
         cursor_offset += y;
     }
@@ -79,7 +79,7 @@ struct TextBufferImpl {
             return;
         cursor_offset = 0;
         for (int i = 0; i < new_line; ++i) {
-            cursor_offset += lines[i].size() + 1;
+            cursor_offset += static_cast<int>(lines[i].size()) + 1;
         }
         cursor_offset += std::min(col, static_cast<int>(lines[new_line].size()));
     }
@@ -89,7 +89,7 @@ struct TextBufferImpl {
         auto [line, _] = CursorPosition();
         cursor_offset = 0;
         for (int i = 0; i < (int)line; ++i) {
-            cursor_offset += lines[i].size() + 1;
+            cursor_offset += static_cast<int>(lines[i].size()) + 1;
         }
     }
 
@@ -98,9 +98,9 @@ struct TextBufferImpl {
         auto [line, _] = CursorPosition();
         cursor_offset = 0;
         for (int i = 0; i < (int)line; ++i) {
-            cursor_offset += lines[i].size() + 1;
+            cursor_offset += static_cast<int>(lines[i].size()) + 1;
         }
-        cursor_offset += lines[line].size();
+        cursor_offset += static_cast<int>(lines[line].size());
     }
 
     void InsertChar(char c) { content.insert(cursor_offset++, 1, c); }
@@ -193,7 +193,7 @@ class TextEditorImpl : public ComponentBase {
 
         float thumb_position = (float)scroll_pos / (total_lines - visible_height);
         return vbox({
-                   filler() | size(HEIGHT, EQUAL, thumb_position * visible_height),
+                   filler() | size(HEIGHT, EQUAL, static_cast<int>(thumb_position * visible_height)),
                    text("▐"),
                    filler(),
                }) |
@@ -221,8 +221,8 @@ class TextEditorImpl : public ComponentBase {
         float thumb_width = std::max(5.f, (float)visible_width / total_width * visible_width);
 
         return hbox({
-                   filler() | size(WIDTH, EQUAL, thumb_position * visible_width),
-                   text("▁▁▁") | size(WIDTH, EQUAL, thumb_width),
+                   filler() | size(WIDTH, EQUAL, static_cast<int>(thumb_position * visible_width)),
+                   text("▁▁▁") | size(WIDTH, EQUAL, static_cast<int>(thumb_width)),
                    filler(),
                }) |
                size(HEIGHT, EQUAL, 1) | frame;
@@ -254,7 +254,7 @@ class TextEditorImpl : public ComponentBase {
 
 
 
-        auto vscroll_bar = (static_cast<int>(lines.size()) > height ? CreateScrollIndicator(lines.size(), height, scroll_y) : emptyElement());
+        auto vscroll_bar = (static_cast<int>(lines.size()) > height ? CreateScrollIndicator(static_cast<int>(lines.size()), height, scroll_y) : emptyElement());
         auto hscroll_bar = (max_line_width_ > width ? CreateHScrollIndicator(max_line_width_, width, scroll_x) : emptyElement());
 
         
