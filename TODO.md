@@ -6,12 +6,6 @@
         + Include CI/CD processes
         + Incude better versioning and better structure of commits
 
-
-
-
-
-
-
 + Tasks
     + ~~Initial Installation and Libs~~
         + ~~README, TODO, CMakeLists.txt~~
@@ -23,7 +17,6 @@
         + ~~logging feature?~~
     
     + Move old custom-viewer to TeMT
-
         + ~~Redefine structure of namespaces and classes~~
             + Now i'll use namespace temt and subnamespaces for each feature of the TeMT
             + Static classes will be rebuilded into functioanl fabrics (it's the good practice from creator of the FTXUI)
@@ -33,7 +26,7 @@
                 + Partial
                     + Open a file or directory
                 + Unimplemented
-                    + Create dir/file
+                    + Create directories/files
                     + Create archive
             + ArchiveManipulations
             + ~~TextWorker (now TextWriter)~~
