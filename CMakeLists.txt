@@ -181,13 +181,11 @@ option(ENABLE_CLANG_TIDY "Enable clang-tidy analysis" ON)
 if(ENABLE_CLANG_TIDY)
     find_program(CLANG_TIDY_EXE NAMES "clang-tidy" "clang-tidy-14" "clang-tidy-15" "clang-tidy-16")
     if(CLANG_TIDY_EXE)
-        # Настройки для игнорирования сторонних библиотек
         set(CLANG_TIDY_CHECKS
             "-checks=*,-modernize-use-trailing-return-type,"
             "-header-filter='${CMAKE_CURRENT_SOURCE_DIR}/src/temt/*|${CMAKE_CURRENT_SOURCE_DIR}/include/*'"
         )
         
-        # Игнорируем third-party код
         set(CLANG_TIDY_ARGS
             "${CLANG_TIDY_CHECKS}"
             "--extra-arg=-Wno-unknown-warning-option"
@@ -201,7 +199,17 @@ if(ENABLE_CLANG_TIDY)
     endif()
 endif()
 
+if(ENABLE_CPPCHECK)
+    get_target_property(TEMT_INCLUDES temt INCLUDE_DIRECTORIES)
+    list(REMOVE_DUPLICATES TEMT_INCLUDES)
 
+    set(CPPCHECK_INCLUDES "")
+    foreach(INC ${TEMT_INCLUDES})
+        set(CPPCHECK_INCLUDES "${CPPCHECK_INCLUDES} -I${INC}")
+    endforeach()
+
+    file(WRITE "${CMAKE_BINARY_DIR}/cppcheck_includes.txt" "${CPPCHECK_INCLUDES}")
+endif()
 
 
 # -------- Installation properties
