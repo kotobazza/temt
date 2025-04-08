@@ -7,62 +7,73 @@
         + Incude better versioning and better structure of commits
 
 + Tasks
-    + ~~Initial Installation and Libs~~
-        + ~~README, TODO, CMakeLists.txt~~
-        + ~~FTXUI~~
-        + ~~libarchive~~
-        + ~~cereal (?)~~
-            + Maybe rapidjson+rapidxml
-        + ~~gtest~~
-        + ~~logging feature?~~
-    
-    + Move old custom-viewer to TeMT
-        + ~~Redefine structure of namespaces and classes~~
-            + Now i'll use namespace temt and subnamespaces for each feature of the TeMT
-            + Static classes will be rebuilded into functioanl fabrics (it's the good practice from creator of the FTXUI)
+    + Old feautres (custom-viewer)
+        + File Manipulations
+            + ~~List files and directories~~
+            + Create dir/file
+            + Open file as:
+                + Json
+                + Xml
 
-        + Move old features to new namepsace structure
-            + FileManipulations
-                + Partial
-                    + Open a file or directory
-                + Unimplemented
-                    + Create directories/files
-                    + Create archive
-            + ArchiveManipulations
-            + ~~TextWorker (now TextWriter)~~
-            + DiskInfo
-            + Json/XML Serialization
-                + Rewrite Boost::PropertyTree to Cereal
-            + ~Mine application class~
-
-        + ~~Divide application class to subclasses and better structure~~
-            + ~~Created class FileBrowser that lets be used to process filesystem operations~~
-                + ~~TODO: let MainApp have entires_ in them instead of FileBrowser. FileBrowser should have only a link to that object~~
-            + ~~Create Upper Panel (should let FileBrowser disappear -> need an toggler for disappearing)~~
-            + ~~Create Main Panel that will let work any other functionalities~~
-
-        + Include tests for each feature
-        + Write better CMakeLists with proper library structure and package generation
-        + ~~Include logging for doubtful feats~~
-
-        + Emojis
-            + Needs more directive check of file types now
-
-
-    + Next steps:
-        + Create more modules for temt:
+                + ~Text~
+        + Archive Manipulations
+            + Create archive from directory
+            + Archive
+        + Text Worker
+            + ~~Open text~~
+            + ~~Edit text~~
+            + ~~Save text~~
+        + Disk Info
+            + Show info about filesystems on device
+        + Json/Xml serialization
+            + Serialize/deserialize object
+            + Check file structure in deserialization
+    + New features
+        + Better build
+            + Used libraries
+                + ~~FTXUI~~
+                + ~~Libarchive~~
+                + Cereal (?)
+                    + > maybe rapidjson+rapidxml
+                + ~~gtest~~
+                + ~~spdlog~~ (?)
+            + Packages
+                + ~~Windows~~
+                + ~~RPM~~
+                + ~~DEB~~
+            + Tests
+                + ~~Broken tests for Libarchive~~
+                + Tests for interface (how to do?)
+                    + > FTXUI is able to represent interface as string
+                + Tests for features themselves
+        + Features
+            + Selected File Entries buffer
+            + ~~Emojis for files~~ 
+                + > (needs more emojis)
+            + True API for modules
+            + Transform Disk Info to Disk Usage or even ncdu
+            + Archive Manipulation
+                + Create archive from files buffer
             + Caesar Cipher
             + IP-worker
             + bin-hex-oct calculator
             + Calculator
-                + Maybe with using ftxui::Canvas
+                + Maybe with using ftxui::Canvas for functions
             + Chrome::Dino
-            + Archive viewer and creation
             + Show statistics of system and application itself
-        + Define better structure for modules and open API for integrating the modules
-        + Add library for working with YML
-            + Settings in YML
-            + Define paths for settings for temt
+            + Better settings
+                + Control on color themes
+                + Control on emojis for each shown emoji
+                + File in YML format
+        + Refactor
+            + Transform static classes to functions (and place functions in namespaces)
+            + Divide main application into subclasses 
+                + Use the Best Practices to implement ftxui::Component as parts of the application
+                + Use class for application data
+                    + All components may read this data (and by type& too), but can't call functions of this class. Except the class for main application
+                    + Due to functional style of FTXUI - all state is saved in application class, and the interface just reacts on the state
+                        + Needs better testing   
+
 
 
 
