@@ -32,8 +32,7 @@ class TextWriterImpl : public ComponentBase {
     }
 
     TextWriterImpl(std::string_view content, std::string_view current_dir, std::function<void()> exitClosure)
-        : exitClosure_(exitClosure) {
-        content_ = content.data();
+        : exitClosure_(exitClosure), content_(content.data()) {
         textSource_ = TextEditor(content_, is_file_changed);
         Add(textSource_);
         is_opened_file_ = true;

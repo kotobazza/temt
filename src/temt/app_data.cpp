@@ -6,21 +6,20 @@ void AppData::NavigateToPath(std::string_view path) {
         usingDirectorySelected_ = 0;
         usingDirectoryEntries_.clear();
 
-        for (auto entry : temt::FileManip::readDirectoryFlatEntries(path)) {
-            usingDirectoryEntries_.push_back(entry);
-        }
+        auto entries = temt::FileManip::readDirectoryFlatEntries(path);
+        std::copy(entries.begin(), entries.end(), std::back_inserter(usingDirectoryEntries_));
 
         current_path_ = path;
 
         notify();
     } catch (const std::exception& e) {
         file_logger_->error("Navigation failed: {}", e.what());
-        //TODO: restoration?????
+        // TODO: restoration?????
     }
 }
 
 void AppData::notify() {
-    for (auto& listener : listeners) {
+    for (const auto& listener : listeners) {
         listener();
     }
 }

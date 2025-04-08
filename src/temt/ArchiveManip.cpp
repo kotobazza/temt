@@ -18,7 +18,7 @@ typedef std::ptrdiff_t ssize_t;
 namespace temt {
 namespace ArchiveManip {
 /*Creates zip archive given by entry names (only files, not dirs) and path for save (shouldn't exist before)*/
-FileManip::ActionState createNewZipArchive(std::vector<FileManip::FileInfo> entries, std::string_view path) {
+FileManip::ActionState createNewZipArchive(std::vector<FileManip::FileInfo>& entries, std::string_view path) {
     auto logger = spdlog::get("file_logger");
     if (FileManip::isExistingPath(path))
         return FileManip::ActionState::Exists;
