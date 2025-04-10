@@ -15,4 +15,4 @@ Terminal multitool writter on [FTXUI](https://github.com/ArthurSonzogni/FTXUI)
 
 
 ## Custom-viewer
-TeMT forks old repo [custom-viewer](https://github.com/kotobazza/custom-viewer)
+TeMT forks old repo [custom-viewer](https://github.com/kotobazza/custom_viewer)
